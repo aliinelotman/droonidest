@@ -1,0 +1,14 @@
+/dist
+/node_modules
+/.angular
+
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+.DS_Store
+Thumbs.db
