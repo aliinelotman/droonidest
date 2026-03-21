@@ -168,62 +168,138 @@ POST   /api/v1/admin/lessons/{id}/generate-audio  # Trigger TTS (admin)
 POST   /api/v1/storage/upload             # Upload file (admin)
 ```
 
-## Database Schema (high-level)
+## Database Schema
+
+8 tables, UUIDv4 primary keys, PostgreSQL 16+. Full schema in [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql), design rationale in [`database/architecture.md`](database/architecture.md).
 
 ```mermaid
 erDiagram
     users {
-        bigint id PK
+        uuid id PK
         varchar google_id UK
         varchar email UK
         varchar display_name
-        varchar role "USER | ADMIN"
-        timestamp created_at
+        text avatar_url
+        user_role role "user | admin"
+        boolean is_active
+        timestamptz created_at
+        timestamptz updated_at
     }
 
     modules {
-        bigint id PK
+        uuid id PK
         varchar title
+        varchar slug UK
         text description
+        text thumbnail_url
         int sort_order
-        boolean is_public
-        timestamp created_at
+        boolean is_published
+        boolean is_free_preview
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz updated_at
     }
 
     lessons {
-        bigint id PK
-        bigint module_id FK
+        uuid id PK
+        uuid module_id FK
         varchar title
-        text content "HTML from editor"
-        varchar audio_url
+        varchar slug UK
+        text content_markdown
+        text video_url
         int sort_order
+        int estimated_minutes
+        boolean is_published
+        boolean is_free_preview
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    lesson_attachments {
+        uuid id PK
+        uuid lesson_id FK
+        varchar file_name
+        text file_url
+        varchar file_type
+        int file_size_bytes
+        int sort_order
+        timestamptz created_at
     }
 
     exercises {
-        bigint id PK
-        bigint lesson_id FK
-        varchar type "DRAG_AND_DROP | QUIZ | MATCHING"
-        jsonb definition "flexible per type"
+        uuid id PK
+        uuid lesson_id FK_UK
+        varchar title
+        int passing_score_pct
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    exercise_questions {
+        uuid id PK
+        uuid exercise_id FK
+        text question_text
+        question_type question_type
+        jsonb options
+        varchar correct_answer
+        text explanation
         int sort_order
     }
 
-    user_progress {
-        bigint id PK
-        bigint user_id FK
-        bigint lesson_id FK
-        boolean completed
-        int score
-        timestamp completed_at
+    user_lesson_progress {
+        uuid id PK
+        uuid user_id FK
+        uuid lesson_id FK
+        lesson_status status
+        int progress_pct
+        timestamptz started_at
+        timestamptz completed_at
     }
 
+    user_exercise_attempts {
+        uuid id PK
+        uuid user_id FK
+        uuid exercise_id FK
+        int score_pct
+        boolean passed
+        jsonb answers
+        timestamptz attempted_at
+    }
+
+    users ||--o{ modules : "created_by"
+    users ||--o{ lessons : "created_by"
+    users ||--o{ user_lesson_progress : tracks
+    users ||--o{ user_exercise_attempts : attempts
     modules ||--o{ lessons : contains
-    lessons ||--o{ exercises : contains
-    users ||--o{ user_progress : tracks
-    lessons ||--o{ user_progress : "completed by"
+    lessons ||--o{ lesson_attachments : has
+    lessons ||--o| exercises : "0..1"
+    lessons ||--o{ user_lesson_progress : "progress on"
+    exercises ||--o{ exercise_questions : contains
+    exercises ||--o{ user_exercise_attempts : "attempted via"
 ```
 
-- Exercise definitions use a `jsonb` column so different exercise types (drag-and-drop, quiz, matching) can have different shapes without schema changes.
-- Flyway migrations live in `backend/src/main/resources/db/migration/`.
+### Key design decisions
+
+- **Soft deletes** via `is_active` (users) and `is_published` (content) — no hard deletes
+- **`is_free_preview`** on both modules and lessons for granular visitor access
+- **JSONB** for exercise options and submitted answers (flexible without extra join tables)
+- **`sort_order`** integer on modules, lessons, attachments, questions for manual ordering
+- **Partial indexes** on `is_published = TRUE` for fast public-facing queries
+- **`ON DELETE CASCADE`** from modules → lessons → attachments/exercises
+- **`ON DELETE SET NULL`** for `created_by` references (keep content if admin is removed)
+- **Auto-updated `updated_at`** via PostgreSQL trigger on users, modules, lessons, exercises
+
+### Database files
+
+| File | Purpose |
+|------|---------|
+| [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql) | Full migration: extensions, enums, 8 tables, indexes, constraints, triggers |
+| [`database/seeds/seed_data.sql`](database/seeds/seed_data.sql) | Seed data: users, modules, lessons, exercises, progress records |
+| [`database/queries/common_queries.sql`](database/queries/common_queries.sql) | Ready-to-use queries for visitor, user, and admin features |
+| [`database/architecture.md`](database/architecture.md) | Detailed design doc with visibility rules, exercise system, progress tracking |
+
+Flyway migrations live in `backend/src/main/resources/db/migration/` (copy from `database/migrations/` when integrating with Spring Boot).
 
 ## File Storage
 
@@ -248,7 +324,7 @@ MinIO provides S3-compatible object storage in Docker. The backend uses the AWS 
 2. Admin clicks "Generate Audio" → backend receives request
 3. Spring `@Async` method sends text to Google Cloud TTS API
 4. Resulting MP3 is stored in MinIO (`audio` bucket)
-5. `audio_url` on the lesson record is updated
+5. `audio_url` on the lesson record is updated (column to be added in a future migration)
 6. Frontend plays audio via standard `<audio>` element synced with content
 
 ## SVG Animations
@@ -260,7 +336,7 @@ MinIO provides S3-compatible object storage in Docker. The backend uses the AWS 
 
 ## Content Management (post-MVP)
 
-For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as HTML in the `lessons.content` column.
+For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as Markdown in the `lessons.content_markdown` column and rendered to HTML on the frontend.
 
 ## Docker Compose Services
 
@@ -275,7 +351,7 @@ services:
 ## Gamification (MVP)
 
 - **Progress tracking**: per-lesson and per-module completion percentage
-- **Score recording**: exercise results stored in `user_progress`
+- **Score recording**: exercise results stored in `user_exercise_attempts`, lesson progress in `user_lesson_progress`
 - **Dashboard**: visual progress bars per module
 
 Post-MVP: badges, achievements, streaks, leaderboards.
