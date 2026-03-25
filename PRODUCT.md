@@ -19,12 +19,9 @@
 ### Lessons
 - Markdown content with optional embedded video
 - Downloadable file attachments (PDF, images)
-- Estimated reading time
-- Granular publish and free-preview flags per lesson
 
-### Exercises
+### Exercises (Will not be implemented)
 - Optional per-lesson exercise (multiple choice, true/false)
-- Configurable passing threshold (default 70%)
 - Post-answer explanations
 - Unlimited retakes with full attempt history
 
@@ -53,41 +50,33 @@
 |-------|-------|---------------------|
 | US-04 | Kasutajana soovin näha kõiki avaldatud mooduleid kataloogis, et valida, mida õppida. | Kuvatakse ainult `is_published = TRUE` moodulid `sort_order` järjekorras. |
 | US-05 | Kasutajana soovin näha iga mooduli lühikirjeldust ja pisipilti, et otsustada, kas teema mind huvitab. | Mooduli kaardil kuvatakse `title`, `description` ja `thumbnail_url` (või vaikimisi placeholder). |
-| US-06 | Kasutajana soovin proovida tasuta eelvaate mooduleid ilma sisselogimata, et saaksin platvormi enne registreerimist hinnata. | `is_free_preview = TRUE` moodulid ja nende `is_free_preview = TRUE` tunnid on kättesaadavad ilma autentimata. |
 
 #### Tundide läbimine
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
 | US-07 | Kasutajana soovin näha mooduli tundide nimekirja õiges järjekorras, et teaksin, kust alustada ja mis järgmiseks tuleb. | Tunnid kuvatakse `sort_order` järgi; ainult `is_published = TRUE` tunnid on nähtavad. |
-| US-08 | Kasutajana soovin lugeda tunni sisu Markdown-formaadis, et saaksin struktureeritud õppematerjali. | `content_markdown` renderdatakse HTML-iks frontendis; pealkirjad, loendid, koodiplokid jms kuvatakse korrektselt. |
+| US-08 | Kasutajana soovin lugeda tunni sisu. |
 | US-09 | Kasutajana soovin vaadata tunni videot (kui see on olemas), et saaksin visuaalset õppematerjali. | Kui `video_url` ei ole NULL, kuvatakse manustatud videopleier; kui NULL, siis video sektsiooni ei kuvata. |
-| US-10 | Kasutajana soovin näha tunni hinnangulist kestust minutites, et saaksin oma õppeaega planeerida. | `estimated_minutes` kuvatakse tunni päises; kui NULL, siis kestust ei kuvata. |
-| US-11 | Kasutajana soovin alla laadida tunniga seotud manuseid (PDF-id, pildid), et saaksin lisamaterjale kasutada. | Manused kuvatakse `sort_order` järgi koos `file_name`, `file_type` ikooni ja loetava `file_size_bytes` väärtusega; klõps algatab allalaadimise. |
 
 #### Edasijõudmine ja progress
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
-| US-12 | Kasutajana soovin, et minu tunni progress salvestatakse automaatselt, et saaksin hiljem pooleli jäänud kohast jätkata. | `user_lesson_progress` rida luuakse/uuendatakse (upsert `UNIQUE(user_id, lesson_id)` peal); `progress_pct` ja `status` salvestatakse. |
 | US-13 | Kasutajana soovin näha oma edasijõudmist protsentides iga tunni kohta, et teaksin, kui palju on veel jäänud. | `progress_pct` kuvatakse progressiriba kujul iga tunni kõrval. |
 | US-14 | Kasutajana soovin näha, millised tunnid on alustamata / pooleli / läbitud, et saaksin kiire ülevaate oma progressist. | Iga tunni kõrval kuvatakse `status` ikoon: hall (not_started), kollane (in_progress), roheline (completed). |
-| US-15 | Kasutajana soovin näha mooduli üldist läbimise protsenti, et teaksin, kui kaugel olen. | Mooduli protsent = (tunnid, kus `status = 'completed'`) / (kõik avaldatud tunnid moodulis) × 100. |
 
-#### Testid ja viktoriinid
+#### Testid ja viktoriinid (Hetkel ei implementeeri)
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
 | US-16 | Kasutajana soovin pärast tunni läbimist teha testi, et kontrollida oma teadmisi. | Testi nupp kuvatakse ainult siis, kui tunnile on seotud `exercises` rida (`lesson_id` kaudu). |
 | US-17 | Kasutajana soovin näha mitme valikuga ja tõene/väär küsimusi, et test oleks mitmekesine. | Küsimused renderdatakse `question_type` järgi: `multiple_choice` = raadionupud `options` JSONB-st; `true_false` = kaks valikut. |
 | US-18 | Kasutajana soovin pärast vastuse esitamist näha selgitust, miks õige vastus on õige, et ma sellest õpiksin. | Pärast esitamist kuvatakse iga küsimuse `explanation` (kui ei ole NULL). |
-| US-19 | Kasutajana soovin näha oma testi tulemust protsentides ja kas läbisin testi, et teaksin, kas pean uuesti proovima. | `score_pct` ja `passed` kuvatakse tulemuse lehel; `passed` = `score_pct >= passing_score_pct`. |
-| US-20 | Kasutajana soovin testi uuesti sooritada, et parandada oma tulemust. | Uus `user_exercise_attempts` rida luuakse igal katsel; eelmised katsed säilitatakse. |
-| US-21 | Kasutajana soovin näha kõiki oma varasemaid testi katseid ja tulemusi, et jälgida oma arengut. | Katsete ajalugu kuvatakse `attempted_at` kahanevas järjekorras koos `score_pct` ja `passed` väärtustega. |
 
 ---
 
-### Admin
+### Admin (Hetkel ei implementeeri MVP osana)
 
 #### Kasutajate haldamine
 
