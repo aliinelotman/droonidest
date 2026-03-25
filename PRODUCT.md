@@ -48,8 +48,8 @@
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
-| US-04 | Kasutajana soovin näha kõiki avaldatud mooduleid kataloogis, et valida, mida õppida. | Kuvatakse ainult `is_published = TRUE` moodulid `sort_order` järjekorras. |
-| US-05 | Kasutajana soovin näha iga mooduli lühikirjeldust ja pisipilti, et otsustada, kas teema mind huvitab. | Mooduli kaardil kuvatakse `title`, `description` ja `thumbnail_url` (või vaikimisi placeholder). |
+| US-04 | Kasutajana soovin näha kõiki avaldatud mooduleid lehe päises asuvas burgeriikoonil avanevas menüüs, et valida, mida õppida. Soovin, et lehe päis ning burgeriikoon kuvatakse stickylt ning liiguksid minu vaatega kaasa. | Menüüs kuvatakse ainult `is_published = TRUE` moodulid `sort_order` järjekorras. |
+| US-05 | Kasutajana soovin ka iga mooduli lõpus näha kõikide saadaolevate moodulite kaarte: lühikirjeldust ja pisipilti, et otsustada, kas teema mind huvitab. | Mooduli kaardil kuvatakse `title`, `description` ja `thumbnail_url` (või vaikimisi placeholder). |
 
 #### Tundide läbimine
 
