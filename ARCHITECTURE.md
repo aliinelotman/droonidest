@@ -204,6 +204,7 @@ erDiagram
         content_status status "draft|published|archived"
         content_format content_format "html|markdown"
         text video_url
+        bool if_free_preview
         timestamptz created_at
         timestamptz updated_at
     }
@@ -235,12 +236,10 @@ erDiagram
 
 ### Key design decisions
 
-- **Soft deletes** via `is_active` (users) and `is_published` (content) — no hard deletes
+- **Soft deletes** via `deleted_at` (users) and `content_status` (content) — no hard deletes
 - **`is_free_preview`** on both modules and lessons for granular visitor access
 - **JSONB** for exercise options and submitted answers (flexible without extra join tables)
 - **`sort_order`** integer on modules, lessons, attachments, questions for manual ordering
-- **Partial indexes** on `is_published = TRUE` for fast public-facing queries
-- **`ON DELETE CASCADE`** from modules → lessons → attachments/exercises
 - **`ON DELETE SET NULL`** for `created_by` references (keep content if admin is removed)
 - **Auto-updated `updated_at`** via PostgreSQL trigger on users, modules, lessons, exercises
 
@@ -248,9 +247,9 @@ erDiagram
 
 | File | Purpose |
 |------|---------|
-| [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql) | Full migration: extensions, enums, 8 tables, indexes, constraints, triggers |
-| [`database/seeds/seed_data.sql`](database/seeds/seed_data.sql) | Seed data: users, modules, lessons, exercises, progress records |
-| [`database/queries/common_queries.sql`](database/queries/common_queries.sql) | Ready-to-use queries for visitor, user, and admin features |
+| [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql) | Full migration: extensions, enums, 5 tables (users, modules, lessons, module_lessons, user_lesson_progress), indexes, constraints, triggers |
+| [`database/seeds/seed_data.sql`](database/seeds/seed_data.sql) | Seed data: users, modules, lessons, module lessons linkage, user progress |
+| [`database/queries/common_queries.sql`](database/queries/common_queries.sql) | Ready-to-use queries for visitor, user, and admin features (content filters, progress aggregation, module paging) |
 | [`database/architecture.md`](database/architecture.md) | Detailed design doc with visibility rules, exercise system, progress tracking |
 
 Flyway migrations live in `backend/src/main/resources/db/migration/` (copy from `database/migrations/` when integrating with Spring Boot).
@@ -290,7 +289,7 @@ MinIO provides S3-compatible object storage in Docker. The backend uses the AWS 
 
 ## Content Management (post-MVP)
 
-For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as Markdown in the `lessons.content_markdown` column and rendered to HTML on the frontend.
+For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as Markdown in the `lessons.content` column and rendered to HTML on the frontend.
 
 ## Docker Compose Services
 
