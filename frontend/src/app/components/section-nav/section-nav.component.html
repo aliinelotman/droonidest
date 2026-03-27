@@ -1,0 +1,59 @@
+<header class="topbar">
+  <button class="topbar__burger" (click)="toggleSidebar()" [attr.aria-expanded]="sidebarOpen">
+    @if (sidebarOpen) {
+      <svg class="topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      <span class="topbar__label">Sulge</span>
+    } @else {
+      <svg class="topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      <span class="topbar__label">Menüü</span>
+    }
+  </button>
+
+  <span class="topbar__title">Droonisõja ABC</span>
+</header>
+
+<!-- Backdrop -->
+@if (sidebarOpen) {
+  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+}
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.sidebar--open]="sidebarOpen">
+  <nav class="sidebar__nav">
+    @for (section of sections; track section.id) {
+      <button
+        class="sidebar__link"
+        [class.sidebar__link--active]="activeId === section.id"
+        (click)="scrollTo(section.id)"
+      >
+        <span class="sidebar__indicator"></span>
+        {{ section.label }}
+      </button>
+    }
+  </nav>
+
+  @if (moduleLinks.length) {
+    <div class="sidebar__divider"></div>
+    <nav class="sidebar__nav">
+      <span class="sidebar__heading">Modules</span>
+      @for (link of moduleLinks; track link.route) {
+        <a
+          class="sidebar__link"
+          [class.sidebar__link--active]="link.active"
+          [routerLink]="link.route"
+          (click)="closeSidebar()"
+        >
+          <span class="sidebar__indicator"></span>
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+  }
+</aside>

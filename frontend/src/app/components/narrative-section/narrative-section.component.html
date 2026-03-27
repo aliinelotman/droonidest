@@ -1,0 +1,15 @@
+<section class="narrative" [class.narrative--reverse]="reverse">
+  <div class="narrative__text">
+    <h2 class="narrative__heading">{{ heading }}</h2>
+    <p class="narrative__body">{{ body }}</p>
+  </div>
+  <div class="narrative__image">
+    @if (imageUrl) {
+      <img [src]="imageUrl" [alt]="imageAlt" />
+    } @else {
+      <div class="narrative__placeholder">
+        <span>{{ imageAlt }}</span>
+      </div>
+    }
+  </div>
+</section>
