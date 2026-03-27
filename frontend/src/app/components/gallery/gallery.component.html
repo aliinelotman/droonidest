@@ -1,0 +1,28 @@
+<div class="gallery">
+  <h2 class="gallery__title">Drone Arsenal</h2>
+  <p class="gallery__subtitle">Click any card to learn more</p>
+
+  <div class="gallery__grid">
+    @for (drone of drones; track drone.name) {
+      <button class="gallery__card" (click)="openLightbox(drone)">
+        <div class="gallery__card-image">
+          <span class="gallery__card-type">{{ drone.type }}</span>
+        </div>
+        <h3 class="gallery__card-name">{{ drone.name }}</h3>
+      </button>
+    }
+  </div>
+</div>
+
+@if (selectedDrone) {
+  <div class="lightbox" (click)="closeLightbox()">
+    <div class="lightbox__content" (click)="$event.stopPropagation()">
+      <button class="lightbox__close" (click)="closeLightbox()">&times;</button>
+      <div class="lightbox__image">
+        <span class="lightbox__type">{{ selectedDrone.type }}</span>
+      </div>
+      <h3 class="lightbox__name">{{ selectedDrone.name }}</h3>
+      <p class="lightbox__desc">{{ selectedDrone.description }}</p>
+    </div>
+  </div>
+}
