@@ -48,14 +48,14 @@
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
-| US-04 | Kasutajana soovin näha kõiki avaldatud mooduleid lehe päises asuvas burgeriikoonil avanevas menüüs, et valida, mida õppida. Soovin, et lehe päis ning burgeriikoon kuvatakse stickylt ning liiguksid minu vaatega kaasa. | Menüüs kuvatakse ainult `is_published = TRUE` moodulid `sort_order` järjekorras. |
+| US-04 | Kasutajana soovin näha kõiki avaldatud mooduleid lehe päises asuvas burgeriikoonil avanevas menüüs, et valida, mida õppida. Soovin, et lehe päis ning burgeriikoon kuvatakse stickylt ning liiguksid minu vaatega kaasa. | Menüüs kuvatakse ainult `content_status = published` moodulid `sort_order` järjekorras. |
 | US-05 | Kasutajana soovin ka iga mooduli lõpus näha kõikide saadaolevate moodulite kaarte: lühikirjeldust ja pisipilti, et otsustada, kas teema mind huvitab. | Mooduli kaardil kuvatakse `title`, `description` ja `thumbnail_url` (või vaikimisi placeholder). |
 
 #### Tundide läbimine
 
 | ID    | Story | Acceptance Criteria |
 |-------|-------|---------------------|
-| US-07 | Kasutajana soovin näha mooduli tundide nimekirja õiges järjekorras, et teaksin, kust alustada ja mis järgmiseks tuleb. | Tunnid kuvatakse `sort_order` järgi; ainult `is_published = TRUE` tunnid on nähtavad. |
+| US-07 | Kasutajana soovin näha mooduli tundide nimekirja õiges järjekorras, et teaksin, kust alustada ja mis järgmiseks tuleb. | Tunnid kuvatakse `sort_order` järgi; ainult `content_status = published` tunnid on nähtavad. |
 | US-08 | Kasutajana soovin lugeda tunni sisu. |
 | US-09 | Kasutajana soovin vaadata tunni videot (kui see on olemas), et saaksin visuaalset õppematerjali. | Kui `video_url` ei ole NULL, kuvatakse manustatud videopleier; kui NULL, siis video sektsiooni ei kuvata. |
 
@@ -92,7 +92,7 @@
 |-------|-------|---------------------|
 | AS-04 | Adminina soovin luua uue mooduli pealkirja, kirjelduse ja pisipildiga, et struktureerida õppematerjali. | Uus `modules` rida luuakse; `slug` genereeritakse automaatselt `title`-st; `created_by` seatakse praeguse admini ID-ks. |
 | AS-05 | Adminina soovin muuta mooduli järjekorda, et kontrollida kataloogis kuvamise järjekorda. | `sort_order` väärtust saab muuta drag-and-drop või numbri sisestamisega; muudatus kajastub koheselt kataloogis. |
-| AS-06 | Adminina soovin avaldada või peita mooduli, et kontrollida, millal sisu kasutajatele nähtavaks muutub. | `is_published` toggle; FALSE = nähtav ainult adminidele; TRUE = nähtav kõigile. |
+| AS-06 | Adminina soovin avaldada või peita mooduli, et kontrollida, millal sisu kasutajatele nähtavaks muutub. | `content_status` toggle; `draft, archived` = nähtav ainult adminidele; `published` = nähtav kõigile. |
 | AS-07 | Adminina soovin märkida mooduli tasuta eelvaateks, et külastajad saaksid sisu enne registreerimist proovida. | `is_free_preview` toggle; TRUE = moodul ja selle tasuta tunnid on kättesaadavad ilma sisselogimata. |
 | AS-08 | Adminina soovin muuta mooduli pealkirja, kirjeldust ja slug-i, et hoida sisu ajakohasena. | Väljad on muudetavad; slug-i muutmine kontrollib unikaalsust; `updated_at` uuendatakse trigeri kaudu. |
 

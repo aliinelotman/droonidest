@@ -170,113 +170,67 @@ POST   /api/v1/storage/upload             # Upload file (admin)
 
 ## Database Schema
 
-8 tables, UUIDv4 primary keys, PostgreSQL 16+. Full schema in [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql), design rationale in [`database/architecture.md`](database/architecture.md).
-
 ```mermaid
 erDiagram
-    users {
+    USERS {
         uuid id PK
-        varchar google_id UK
-        varchar email UK
-        varchar display_name
+        text google_id UK
+        text email UK
+        text display_name
         text avatar_url
-        user_role role "user | admin"
-        boolean is_active
+        boolean email_verified
         timestamptz created_at
         timestamptz updated_at
+        timestamptz deleted_at
     }
 
-    modules {
+    MODULES {
         uuid id PK
-        varchar title
-        varchar slug UK
+        text title
         text description
         text thumbnail_url
+        content_status status "draft|published|archived"
         int sort_order
-        boolean is_published
-        boolean is_free_preview
-        uuid created_by FK
+        bool if_free_preview
         timestamptz created_at
         timestamptz updated_at
     }
 
-    lessons {
+    LESSONS {
         uuid id PK
         uuid module_id FK
-        varchar title
-        varchar slug UK
-        text content_markdown
+        text title
+        text content
+        content_status status "draft|published|archived"
+        content_format content_format "html|markdown"
         text video_url
-        int sort_order
-        int estimated_minutes
-        boolean is_published
-        boolean is_free_preview
-        uuid created_by FK
         timestamptz created_at
         timestamptz updated_at
     }
 
-    lesson_attachments {
-        uuid id PK
-        uuid lesson_id FK
-        varchar file_name
-        text file_url
-        varchar file_type
-        int file_size_bytes
+    MODULE_LESSONS {
+        uuid module_id PK, FK
+        uuid lesson_id PK, FK
         int sort_order
         timestamptz created_at
     }
 
-    exercises {
-        uuid id PK
-        uuid lesson_id FK_UK
-        varchar title
-        int passing_score_pct
-        timestamptz created_at
-        timestamptz updated_at
-    }
-
-    exercise_questions {
-        uuid id PK
-        uuid exercise_id FK
-        text question_text
-        question_type question_type
-        jsonb options
-        varchar correct_answer
-        text explanation
-        int sort_order
-    }
-
-    user_lesson_progress {
-        uuid id PK
-        uuid user_id FK
-        uuid lesson_id FK
-        lesson_status status
-        int progress_pct
+    USER_LESSON_PROGRESS {
+        uuid user_id PK, FK
+        uuid lesson_id PK, FK
+        decimal progress_pct
+        lesson_progress_status status "not_started|in_progress|completed"
         timestamptz started_at
         timestamptz completed_at
+        timestamptz last_viewed_at
+        timestamptz created_at
+        timestamptz updated_at
     }
 
-    user_exercise_attempts {
-        uuid id PK
-        uuid user_id FK
-        uuid exercise_id FK
-        int score_pct
-        boolean passed
-        jsonb answers
-        timestamptz attempted_at
-    }
-
-    users ||--o{ modules : "created_by"
-    users ||--o{ lessons : "created_by"
-    users ||--o{ user_lesson_progress : tracks
-    users ||--o{ user_exercise_attempts : attempts
-    modules ||--o{ lessons : contains
-    lessons ||--o{ lesson_attachments : has
-    lessons ||--o| exercises : "0..1"
-    lessons ||--o{ user_lesson_progress : "progress on"
-    exercises ||--o{ exercise_questions : contains
-    exercises ||--o{ user_exercise_attempts : "attempted via"
+    MODULES ||--o{ MODULE_LESSONS : contains
+    LESSONS ||--o{ MODULE_LESSONS : included_in
+    USERS ||--o{ USER_LESSON_PROGRESS : tracks
+    LESSONS ||--o{ USER_LESSON_PROGRESS : has
 ```
 
 ### Key design decisions
