@@ -181,62 +181,91 @@ POST   /api/v1/admin/lessons/{id}/generate-audio  # Trigger TTS (admin)
 POST   /api/v1/storage/upload             # Upload file (admin)
 ```
 
-## Database Schema (high-level)
+## Database Schema
 
 ```mermaid
 erDiagram
-    users {
-        bigint id PK
-        varchar google_id UK
-        varchar email UK
-        varchar display_name
-        varchar role "USER | ADMIN"
-        timestamp created_at
+    USERS {
+        uuid id PK
+        text google_id UK
+        text email UK
+        text display_name
+        text avatar_url
+        boolean email_verified
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
     }
 
-    modules {
-        bigint id PK
-        varchar title
+    MODULES {
+        uuid id PK
+        text title
         text description
+        text thumbnail_url
+        content_status status "draft|published|archived"
         int sort_order
-        boolean is_public
-        timestamp created_at
+        bool if_free_preview
+        timestamptz created_at
+        timestamptz updated_at
     }
 
-    lessons {
-        bigint id PK
-        bigint module_id FK
-        varchar title
-        text content "HTML from editor"
-        varchar audio_url
+    LESSONS {
+        uuid id PK
+        uuid module_id FK
+        text title
+        text content
+        content_status status "draft|published|archived"
+        content_format content_format "html|markdown"
+        text video_url
+        bool if_free_preview
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    MODULE_LESSONS {
+        uuid module_id PK, FK
+        uuid lesson_id PK, FK
         int sort_order
+        timestamptz created_at
     }
 
-    exercises {
-        bigint id PK
-        bigint lesson_id FK
-        varchar type "DRAG_AND_DROP | QUIZ | MATCHING"
-        jsonb definition "flexible per type"
-        int sort_order
+    USER_LESSON_PROGRESS {
+        uuid user_id PK, FK
+        uuid lesson_id PK, FK
+        decimal progress_pct
+        lesson_progress_status status "not_started|in_progress|completed"
+        timestamptz started_at
+        timestamptz completed_at
+        timestamptz last_viewed_at
+        timestamptz created_at
+        timestamptz updated_at
     }
 
-    user_progress {
-        bigint id PK
-        bigint user_id FK
-        bigint lesson_id FK
-        boolean completed
-        int score
-        timestamp completed_at
-    }
-
-    modules ||--o{ lessons : contains
-    lessons ||--o{ exercises : contains
-    users ||--o{ user_progress : tracks
-    lessons ||--o{ user_progress : "completed by"
+    MODULES ||--o{ MODULE_LESSONS : contains
+    LESSONS ||--o{ MODULE_LESSONS : included_in
+    USERS ||--o{ USER_LESSON_PROGRESS : tracks
+    LESSONS ||--o{ USER_LESSON_PROGRESS : has
 ```
 
-- Exercise definitions use a `jsonb` column so different exercise types (drag-and-drop, quiz, matching) can have different shapes without schema changes.
-- Flyway migrations live in `backend/src/main/resources/db/migration/`.
+### Key design decisions
+
+- **Soft deletes** via `deleted_at` (users) and `content_status` (content) — no hard deletes
+- **`is_free_preview`** on both modules and lessons for granular visitor access
+- **JSONB** for exercise options and submitted answers (flexible without extra join tables)
+- **`sort_order`** integer on modules, lessons, attachments, questions for manual ordering
+- **`ON DELETE SET NULL`** for `created_by` references (keep content if admin is removed)
+- **Auto-updated `updated_at`** via PostgreSQL trigger on users, modules, lessons, exercises
+
+### Database files
+
+| File | Purpose |
+|------|---------|
+| [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql) | Full migration: extensions, enums, 5 tables (users, modules, lessons, module_lessons, user_lesson_progress), indexes, constraints, triggers |
+| [`database/seeds/seed_data.sql`](database/seeds/seed_data.sql) | Seed data: users, modules, lessons, module lessons linkage, user progress |
+| [`database/queries/common_queries.sql`](database/queries/common_queries.sql) | Ready-to-use queries for visitor, user, and admin features (content filters, progress aggregation, module paging) |
+| [`database/architecture.md`](database/architecture.md) | Detailed design doc with visibility rules, exercise system, progress tracking |
+
+Flyway migrations live in `backend/src/main/resources/db/migration/` (copy from `database/migrations/` when integrating with Spring Boot).
 
 ## File Storage
 
@@ -261,7 +290,7 @@ MinIO provides S3-compatible object storage in Docker. The backend uses the AWS 
 2. Admin clicks "Generate Audio" → backend receives request
 3. Spring `@Async` method sends text to Google Cloud TTS API
 4. Resulting MP3 is stored in MinIO (`audio` bucket)
-5. `audio_url` on the lesson record is updated
+5. `audio_url` on the lesson record is updated (column to be added in a future migration)
 6. Frontend plays audio via standard `<audio>` element synced with content
 
 ## SVG Animations
@@ -273,7 +302,7 @@ MinIO provides S3-compatible object storage in Docker. The backend uses the AWS 
 
 ## Content Management (post-MVP)
 
-For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as HTML in the `lessons.content` column.
+For MVP, admins manage content via admin API endpoints. A WYSIWYG editor (TipTap or similar) is planned for post-MVP to provide a richer editing experience. Content is stored as Markdown in the `lessons.content` column and rendered to HTML on the frontend.
 
 ## Docker Compose Services
 
@@ -288,7 +317,7 @@ services:
 ## Gamification (MVP)
 
 - **Progress tracking**: per-lesson and per-module completion percentage
-- **Score recording**: exercise results stored in `user_progress`
+- **Score recording**: exercise results stored in `user_exercise_attempts`, lesson progress in `user_lesson_progress`
 - **Dashboard**: visual progress bars per module
 
 Post-MVP: badges, achievements, streaks, leaderboards.
