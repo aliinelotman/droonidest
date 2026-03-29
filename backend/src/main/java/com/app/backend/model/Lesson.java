@@ -25,10 +25,6 @@ public class Lesson {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "module_id")
-    private Module module;
-
     @Column(nullable = false)
     private String title;
 
@@ -36,11 +32,11 @@ public class Lesson {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "content_status")
+    @Column(nullable = false, length = 50)
     private ContentStatus status = ContentStatus.DRAFT;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "content_format", nullable = false, columnDefinition = "content_format")
+    @Column(name = "content_format", nullable = false, length = 50)
     private ContentFormat contentFormat = ContentFormat.MARKDOWN;
 
     @Column(name = "video_url")
@@ -59,8 +55,7 @@ public class Lesson {
     @Setter(AccessLevel.NONE)
     private OffsetDateTime updatedAt;
 
-    public Lesson(String title, Module module) {
+    public Lesson(String title) {
         this.title = title;
-        this.module = module;
     }
 }

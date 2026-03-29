@@ -33,7 +33,7 @@ public class Module {
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "content_status")
+    @Column(nullable = false, length = 50)
     private ContentStatus status = ContentStatus.DRAFT;
 
     @Column(name = "sort_order", nullable = false)

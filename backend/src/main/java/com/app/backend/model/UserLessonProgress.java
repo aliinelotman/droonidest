@@ -39,7 +39,7 @@ public class UserLessonProgress {
     private BigDecimal progressPct = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "lesson_progress_status")
+    @Column(nullable = false, length = 50)
     private LessonProgressStatus status = LessonProgressStatus.NOT_STARTED;
 
     @Column(name = "started_at")

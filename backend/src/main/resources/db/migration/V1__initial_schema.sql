@@ -7,13 +7,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================================
--- Custom enum types
--- ============================================================
-CREATE TYPE content_status AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
-CREATE TYPE lesson_progress_status AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED');
-CREATE TYPE content_format AS ENUM ('HTML', 'MARKDOWN');
-
--- ============================================================
 -- Tables
 -- ============================================================
 
@@ -31,28 +24,27 @@ CREATE TABLE users (
 );
 
 CREATE TABLE modules (
-    id               UUID             PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title            TEXT             NOT NULL,
+    id               UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title            TEXT        NOT NULL,
     description      TEXT,
     thumbnail_url    TEXT,
-    status           content_status   NOT NULL DEFAULT 'DRAFT',
-    sort_order       INTEGER          NOT NULL DEFAULT 0,
-    if_free_preview  BOOLEAN          NOT NULL DEFAULT false,
-    created_at       TIMESTAMPTZ      NOT NULL DEFAULT now(),
-    updated_at       TIMESTAMPTZ      NOT NULL DEFAULT now()
+    status           VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+    sort_order       INTEGER     NOT NULL DEFAULT 0,
+    if_free_preview  BOOLEAN     NOT NULL DEFAULT false,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE lessons (
-    id               UUID             PRIMARY KEY DEFAULT uuid_generate_v4(),
-    module_id        UUID             REFERENCES modules(id) ON DELETE SET NULL,
-    title            TEXT             NOT NULL,
+    id               UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title            TEXT        NOT NULL,
     content          TEXT,
-    status           content_status   NOT NULL DEFAULT 'DRAFT',
-    content_format   content_format   NOT NULL DEFAULT 'MARKDOWN',
+    status           VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+    content_format   VARCHAR(50) NOT NULL DEFAULT 'MARKDOWN',
     video_url        TEXT,
-    if_free_preview  BOOLEAN          NOT NULL DEFAULT false,
-    created_at       TIMESTAMPTZ      NOT NULL DEFAULT now(),
-    updated_at       TIMESTAMPTZ      NOT NULL DEFAULT now()
+    if_free_preview  BOOLEAN     NOT NULL DEFAULT false,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE module_lessons (
@@ -64,22 +56,21 @@ CREATE TABLE module_lessons (
 );
 
 CREATE TABLE user_lesson_progress (
-    user_id        UUID                    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    lesson_id      UUID                    NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
-    progress_pct   DECIMAL(5, 2)           NOT NULL DEFAULT 0,
-    status         lesson_progress_status  NOT NULL DEFAULT 'NOT_STARTED',
+    user_id        UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lesson_id      UUID        NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    progress_pct   DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    status         VARCHAR(50) NOT NULL DEFAULT 'NOT_STARTED',
     started_at     TIMESTAMPTZ,
     completed_at   TIMESTAMPTZ,
     last_viewed_at TIMESTAMPTZ,
-    created_at     TIMESTAMPTZ             NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ             NOT NULL DEFAULT now(),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, lesson_id)
 );
 
 -- ============================================================
 -- Indexes on foreign key columns
 -- ============================================================
-CREATE INDEX idx_lessons_module_id           ON lessons(module_id);
 CREATE INDEX idx_module_lessons_lesson_id    ON module_lessons(lesson_id);
 CREATE INDEX idx_user_lesson_progress_lesson ON user_lesson_progress(lesson_id);
 
