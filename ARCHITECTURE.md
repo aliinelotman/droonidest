@@ -107,19 +107,32 @@ sequenceDiagram
 
 ## Backend Structure
 
-Single Spring Boot application, organized by feature:
+Single Spring Boot application with a **layered architecture** — code is organized by technical responsibility rather than by feature:
 
 ```
 backend/src/main/java/com/app/backend/
-├── auth/           # OAuth2 config, JWT filter, token service
-├── user/           # User entity, profile, roles
-├── course/         # Modules, lessons, content management
-├── exercise/       # Exercise engine, types, validation
-├── progress/       # User progress, completion tracking
-├── storage/        # S3/MinIO file service, upload endpoints
-├── admin/          # Admin-specific endpoints, content editing
-└── common/         # Shared DTOs, error handling, base entities
+├── config/             # Spring configuration (security, S3, async, CORS)
+├── security/           # JWT filter, OAuth2 handlers, token service
+├── controller/         # REST controllers (presentation layer)
+├── service/            # Business logic (service layer)
+├── repository/         # Spring Data JPA repositories (data access layer)
+├── model/              # JPA entities
+│   └── enums/          # Enums (UserRole, QuestionType, LessonStatus)
+├── dto/                # Data Transfer Objects
+│   ├── request/        # Incoming request bodies
+│   └── response/       # Outgoing response bodies
+└── exception/          # Custom exceptions, global error handler
 ```
+
+### Layer rules
+
+| Layer | Depends on | Never depends on |
+|-------|-----------|-----------------|
+| `controller` | `service`, `dto` | `repository`, `model` (except enums) |
+| `service` | `repository`, `model`, `dto` | `controller` |
+| `repository` | `model` | `controller`, `service` |
+| `dto` | `model/enums` | `repository`, `service`, `controller` |
+| `exception` | — | anything except Spring framework |
 
 ## Frontend Structure
 
