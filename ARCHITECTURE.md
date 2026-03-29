@@ -260,12 +260,9 @@ erDiagram
 
 | File | Purpose |
 |------|---------|
-| [`database/migrations/001_initial_schema.sql`](database/migrations/001_initial_schema.sql) | Full migration: extensions, enums, 5 tables (users, modules, lessons, module_lessons, user_lesson_progress), indexes, constraints, triggers |
-| [`database/seeds/seed_data.sql`](database/seeds/seed_data.sql) | Seed data: users, modules, lessons, module lessons linkage, user progress |
-| [`database/queries/common_queries.sql`](database/queries/common_queries.sql) | Ready-to-use queries for visitor, user, and admin features (content filters, progress aggregation, module paging) |
-| [`database/architecture.md`](database/architecture.md) | Detailed design doc with visibility rules, exercise system, progress tracking |
+| [`backend/src/main/resources/db/migration/V1__initial_schema.sql`](backend/src/main/resources/db/migration/V1__initial_schema.sql) | Flyway V1 migration: extensions, enums, 5 tables (users, modules, lessons, module_lessons, user_lesson_progress), indexes, constraints, triggers |
 
-Flyway migrations live in `backend/src/main/resources/db/migration/` (copy from `database/migrations/` when integrating with Spring Boot).
+Flyway migrations live in `backend/src/main/resources/db/migration/`.
 
 ## File Storage
 
