@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -33,7 +35,8 @@ public class Module {
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private ContentStatus status = ContentStatus.DRAFT;
 
     @Column(name = "sort_order", nullable = false)

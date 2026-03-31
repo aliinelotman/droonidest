@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -32,11 +34,13 @@ public class Lesson {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private ContentStatus status = ContentStatus.DRAFT;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "content_format", nullable = false, length = 50)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "content_format", nullable = false)
     private ContentFormat contentFormat = ContentFormat.MARKDOWN;
 
     @Column(name = "video_url")

@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -39,7 +41,8 @@ public class UserLessonProgress {
     private BigDecimal progressPct = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private LessonProgressStatus status = LessonProgressStatus.NOT_STARTED;
 
     @Column(name = "started_at")

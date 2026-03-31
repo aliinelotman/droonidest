@@ -32,9 +32,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String message = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(errorBody("BAD_REQUEST", message));
+                .body(errorBody("BAD_REQUEST", "Invalid parameter value"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
