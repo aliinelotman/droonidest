@@ -4,6 +4,12 @@ import com.app.backend.dto.request.GoogleAuthRequest;
 import com.app.backend.dto.response.AuthResponse;
 import com.app.backend.exception.InvalidTokenException;
 import com.app.backend.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +30,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Google OAuth login, token refresh, and logout")
 public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
@@ -36,6 +43,18 @@ public class AuthController {
      * Access token and user profile are returned in the response body.
      * Refresh token is set as an httpOnly cookie.
      */
+    @Operation(
+            summary = "Google OAuth login",
+            description = "Exchanges a Google authorization code for JWT tokens. " +
+                    "Returns access token in body and sets refresh token as an httpOnly cookie.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Authentication successful",
+                            content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Invalid or expired Google code", content = @Content)
+            }
+    )
+    @SecurityRequirements
     @PostMapping("/google")
     public ResponseEntity<AuthResponse> authenticateWithGoogle(
             @Valid @RequestBody GoogleAuthRequest request,
@@ -49,6 +68,15 @@ public class AuthController {
     /**
      * Refreshes the access token using the refresh token from the httpOnly cookie.
      */
+    @Operation(
+            summary = "Refresh access token",
+            description = "Issues a new access token using the refresh token from the httpOnly cookie.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "New access token issued"),
+                    @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token", content = @Content)
+            }
+    )
+    @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
         String refreshToken = extractRefreshTokenFromCookies(request);
@@ -64,6 +92,14 @@ public class AuthController {
     /**
      * Clears the refresh token cookie, effectively logging the user out.
      */
+    @Operation(
+            summary = "Logout",
+            description = "Clears the refresh token cookie, ending the user session.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Logged out successfully")
+            }
+    )
+    @SecurityRequirements
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         clearRefreshTokenCookie(response);
