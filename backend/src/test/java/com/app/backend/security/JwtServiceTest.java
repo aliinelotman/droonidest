@@ -5,14 +5,12 @@ import com.app.backend.config.JwtProperties;
 import com.app.backend.model.User;
 import com.app.backend.model.enums.UserRole;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link JwtService}.
@@ -95,13 +93,12 @@ class JwtServiceTest {
     }
 
     @Test
-    void testGivenInvalidTokenWhenExtractUserIdThenThrowException() {
-        assertThatThrownBy(() -> jwtService.extractUserId("invalid.token.here"))
-                .isInstanceOf(JwtException.class);
+    void testGivenInvalidTokenWhenParseThenReturnNull() {
+        assertThat(jwtService.parseToken("invalid.token.here")).isNull();
     }
 
     @Test
-    void testGivenGarbageStringWhenValidateThenReturnFalse() {
-        assertThat(jwtService.isTokenValid("not-a-jwt")).isFalse();
+    void testGivenGarbageStringWhenParseThenReturnNull() {
+        assertThat(jwtService.parseToken("not-a-jwt")).isNull();
     }
 }

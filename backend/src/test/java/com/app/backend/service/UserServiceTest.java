@@ -2,6 +2,7 @@ package com.app.backend.service;
 
 import com.app.backend.TestEntityFactory;
 import com.app.backend.dto.response.UserResponse;
+import com.app.backend.exception.InvalidTokenException;
 import com.app.backend.exception.ResourceNotFoundException;
 import com.app.backend.model.User;
 import com.app.backend.model.enums.UserRole;
@@ -99,6 +100,30 @@ class UserServiceTest {
         assertThat(response.getEmail()).isEqualTo("test@example.com");
         assertThat(response.getDisplayName()).isEqualTo("Test User");
         assertThat(response.getRole()).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    void testGivenMissingSubWhenFindOrCreateThenThrowInvalidTokenException() {
+        Map<String, Object> googleInfo = Map.of(
+                "email", "test@example.com",
+                "name", "Test User"
+        );
+
+        assertThatThrownBy(() -> userService.findOrCreateFromGoogle(googleInfo))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Google user ID");
+    }
+
+    @Test
+    void testGivenMissingEmailWhenFindOrCreateThenThrowInvalidTokenException() {
+        Map<String, Object> googleInfo = Map.of(
+                "sub", "google-123",
+                "name", "Test User"
+        );
+
+        assertThatThrownBy(() -> userService.findOrCreateFromGoogle(googleInfo))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("email");
     }
 
     private Map<String, Object> createGoogleUserInfo() {
