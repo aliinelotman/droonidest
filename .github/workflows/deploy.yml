@@ -1,0 +1,78 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      DEPLOY_PATH: ~/droonidest-deploy
+      ENV_PRODUCTION_FILE: ${{ secrets.ENV_PRODUCTION_FILE }}
+      DOCKER_COMPOSE_FILE: docker-compose.prod.yaml
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan "$SERVER_IP" >> ~/.ssh/known_hosts
+
+      - name: Create .env.production from secret
+        run: |
+          printf '%s\n' "$ENV_PRODUCTION_FILE" > .env.production
+
+      - name: Create deployment package
+        run: |
+          tar czf deployment.tar.gz \
+            backend/ \
+            frontend/ \
+            "$DOCKER_COMPOSE_FILE" \
+            .env.production
+
+      - name: Copy deployment package to server
+        run: |
+          scp -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=yes \
+            deployment.tar.gz \
+            "$SSH_USER@$SERVER_IP:/tmp/"
+
+      - name: Deploy on server
+        run: |
+          ssh -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SERVER_IP" << 'EOF'
+          set -e
+
+          mkdir -p ~/droonidest-deploy
+          cd ~/droonidest-deploy
+
+          tar xzf /tmp/deployment.tar.gz
+          rm /tmp/deployment.tar.gz
+
+          if [ ! -f docker-compose.prod.yaml ]; then
+            echo "ERROR: docker-compose.prod.yaml not found!"
+            exit 1
+          fi
+
+          if [ -f .env.production ]; then
+            cp .env.production .env
+          fi
+
+          docker compose -f docker-compose.prod.yaml down
+          docker compose -f docker-compose.prod.yaml build --no-cache
+          docker compose -f docker-compose.prod.yaml up -d
+
+          echo "Deployment complete!"
+          docker compose -f docker-compose.prod.yaml ps
+          EOF

@@ -1,4 +1,10 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .fun-fact {
+  height: 100%;
   text-align: center;
   background: linear-gradient(135deg, rgba(240, 165, 0, 0.1), rgba(74, 144, 217, 0.08));
   border: 1px solid rgba(240, 165, 0, 0.2);

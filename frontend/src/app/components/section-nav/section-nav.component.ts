@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 export interface NavSection {
@@ -24,6 +24,11 @@ export class SectionNavComponent {
   @Input() moduleLinks: ModuleLink[] = [];
   activeId: string = '';
   sidebarOpen = false;
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.sidebarOpen) this.closeSidebar();
+  }
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
