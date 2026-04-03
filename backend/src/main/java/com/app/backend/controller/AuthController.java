@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Handles authentication endpoints: Google OAuth login, token refresh, and logout.
@@ -34,7 +37,6 @@ import java.util.Map;
 public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
-    private static final String COOKIE_ATTRIBUTES = "Path=/api/v1/auth; HttpOnly; Secure; SameSite=Strict";
 
     private final AuthService authService;
 
@@ -79,11 +81,8 @@ public class AuthController {
     @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
-        String refreshToken = extractRefreshTokenFromCookies(request);
-
-        if (refreshToken == null) {
-            throw new InvalidTokenException("Refresh token cookie not found");
-        }
+        String refreshToken = extractRefreshTokenFromCookies(request)
+                .orElseThrow(() -> new InvalidTokenException("Refresh token cookie not found"));
 
         String newAccessToken = authService.refreshAccessToken(refreshToken);
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
@@ -107,28 +106,34 @@ public class AuthController {
     }
 
     private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        long maxAge = authService.getRefreshTokenMaxAgeSeconds();
-        String cookieValue = String.format(
-                "%s=%s; %s; Max-Age=%d",
-                REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_ATTRIBUTES, maxAge);
-        response.addHeader("Set-Cookie", cookieValue);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(authService.getRefreshTokenMaxAgeSeconds())
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
-        String cookieValue = String.format(
-                "%s=; %s; Max-Age=0",
-                REFRESH_TOKEN_COOKIE, COOKIE_ATTRIBUTES);
-        response.addHeader("Set-Cookie", cookieValue);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private String extractRefreshTokenFromCookies(HttpServletRequest request) {
+    private Optional<String> extractRefreshTokenFromCookies(HttpServletRequest request) {
         if (request.getCookies() == null) {
-            return null;
+            return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> REFRESH_TOKEN_COOKIE.equals(cookie.getName()))
                 .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 }

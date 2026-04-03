@@ -83,11 +83,16 @@ public class AuthService {
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
 
-        if (tokenResponse == null || !tokenResponse.containsKey("access_token")) {
+        if (tokenResponse == null) {
             throw new InvalidTokenException("Failed to exchange authorization code with Google");
         }
 
-        return (String) tokenResponse.get("access_token");
+        Object rawToken = tokenResponse.get("access_token");
+        if (!(rawToken instanceof String accessToken) || accessToken.isBlank()) {
+            throw new InvalidTokenException("Failed to exchange authorization code with Google");
+        }
+
+        return accessToken;
     }
 
     private Map<String, Object> fetchGoogleUserInfo(String accessToken) {
@@ -112,8 +117,13 @@ public class AuthService {
         try {
             return userService.findOrCreateFromGoogle(userInfo);
         } catch (DataIntegrityViolationException ex) {
-            log.debug("Concurrent user creation detected, retrying lookup: {}", ex.getMessage());
-            return userService.findOrCreateFromGoogle(userInfo);
+            log.warn("Concurrent user creation detected for googleId={}, retrying", userInfo.get("sub"));
+            try {
+                return userService.findOrCreateFromGoogle(userInfo);
+            } catch (DataIntegrityViolationException retryEx) {
+                log.error("User creation failed after retry — possible duplicate constraint violation");
+                throw new InvalidTokenException("Failed to resolve user account", retryEx);
+            }
         }
     }
 

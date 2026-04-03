@@ -1,6 +1,7 @@
 package com.app.backend.service;
 
 import com.app.backend.dto.response.UserResponse;
+import com.app.backend.exception.InvalidTokenException;
 import com.app.backend.exception.ResourceNotFoundException;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
@@ -19,6 +20,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UserService {
 
+    private record GoogleProfile(String googleId, String email, String displayName,
+                                 String avatarUrl, boolean emailVerified) {}
+
     private final UserRepository userRepository;
 
     /**
@@ -27,15 +31,21 @@ public class UserService {
      */
     @Transactional
     public User findOrCreateFromGoogle(Map<String, Object> googleUserInfo) {
-        String googleId = (String) googleUserInfo.get("sub");
-        String email = (String) googleUserInfo.get("email");
-        String displayName = (String) googleUserInfo.get("name");
-        String avatarUrl = (String) googleUserInfo.get("picture");
+        if (!(googleUserInfo.get("sub") instanceof String googleId)) {
+            throw new InvalidTokenException("Missing or invalid Google user ID");
+        }
+        if (!(googleUserInfo.get("email") instanceof String email)) {
+            throw new InvalidTokenException("Missing or invalid email in Google profile");
+        }
+        String displayName = googleUserInfo.get("name") instanceof String s ? s : null;
+        String avatarUrl = googleUserInfo.get("picture") instanceof String s ? s : null;
         boolean emailVerified = Boolean.TRUE.equals(googleUserInfo.get("email_verified"));
 
+        GoogleProfile profile = new GoogleProfile(googleId, email, displayName, avatarUrl, emailVerified);
+
         return userRepository.findByGoogleId(googleId)
-                .map(existingUser -> updateExistingUser(existingUser, displayName, avatarUrl, emailVerified))
-                .orElseGet(() -> createNewUser(googleId, email, displayName, avatarUrl, emailVerified));
+                .map(existingUser -> updateExistingUser(existingUser, profile))
+                .orElseGet(() -> createNewUser(profile));
     }
 
     /**
@@ -59,18 +69,17 @@ public class UserService {
         );
     }
 
-    private User updateExistingUser(User user, String displayName, String avatarUrl, boolean emailVerified) {
-        user.setDisplayName(displayName);
-        user.setAvatarUrl(avatarUrl);
-        user.setEmailVerified(emailVerified);
+    private User updateExistingUser(User user, GoogleProfile profile) {
+        user.setDisplayName(profile.displayName());
+        user.setAvatarUrl(profile.avatarUrl());
+        user.setEmailVerified(profile.emailVerified());
         return user;
     }
 
-    private User createNewUser(String googleId, String email, String displayName,
-                               String avatarUrl, boolean emailVerified) {
-        User user = new User(googleId, email, displayName);
-        user.setAvatarUrl(avatarUrl);
-        user.setEmailVerified(emailVerified);
+    private User createNewUser(GoogleProfile profile) {
+        User user = new User(profile.googleId(), profile.email(), profile.displayName());
+        user.setAvatarUrl(profile.avatarUrl());
+        user.setEmailVerified(profile.emailVerified());
         return userRepository.save(user);
     }
 }
