@@ -58,7 +58,7 @@ public class JwtService {
     public Claims parseToken(String token) {
         try {
             return extractAllClaims(token);
-        } catch (JwtException ex) {
+        } catch (JwtException | IllegalArgumentException ex) {
             return null;
         }
     }
@@ -89,22 +89,6 @@ public class JwtService {
      */
     public boolean isRefreshToken(Claims claims) {
         return TOKEN_TYPE_REFRESH.equals(claims.get(CLAIM_TOKEN_TYPE, String.class));
-    }
-
-    /**
-     * Validates the token signature, expiration, and structure.
-     */
-    public boolean isTokenValid(String token) {
-        return parseToken(token) != null;
-    }
-
-    /**
-     * Extracts the user ID (subject) from a raw token string.
-     *
-     * @throws JwtException if the token is invalid or expired
-     */
-    public UUID extractUserId(String token) {
-        return UUID.fromString(extractAllClaims(token).getSubject());
     }
 
     private String buildToken(User user, String tokenType, long expirationMs) {

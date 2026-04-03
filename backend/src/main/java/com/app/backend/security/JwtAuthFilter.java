@@ -8,7 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,13 +18,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Intercepts each request, extracts and validates the JWT from the Authorization header,
  * and populates the SecurityContext with the authenticated user.
  */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -51,31 +50,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        try {
-            Claims claims = jwtService.parseToken(token);
+        Claims claims = jwtService.parseToken(token);
 
-            if (claims == null || !jwtService.isAccessToken(claims)) {
-                filterChain.doFilter(request, response);
+        if (claims == null || !jwtService.isAccessToken(claims)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+            return;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            UUID userId = jwtService.extractUserId(claims);
+            String role = jwtService.extractRole(claims);
+
+            if (role == null) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: missing role claim");
                 return;
             }
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                UUID userId = jwtService.extractUserId(claims);
-                String role = jwtService.extractRole(claims);
-
-                userRepository.findById(userId).ifPresent(user -> {
-                    List<SimpleGrantedAuthority> authorities =
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role));
-
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(user, null, authorities);
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                });
+            Optional<User> maybeUser = userRepository.findById(userId);
+            if (maybeUser.isEmpty()) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+                return;
             }
-        } catch (Exception ex) {
-            log.debug("Rejected invalid JWT on request {}: {}", request.getRequestURI(), ex.getMessage());
+
+            List<SimpleGrantedAuthority> authorities =
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role));
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(maybeUser.get(), null, authorities);
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         filterChain.doFilter(request, response);
