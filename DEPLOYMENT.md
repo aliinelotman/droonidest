@@ -1,7 +1,7 @@
 # Deployment Health Check
 
 Server: `193.40.157.230`, user: `ubuntu`, deploy path: `~/droonidest-deploy`
-Domain: `team-08.ddns.net`
+Domain: `droonidest.duckdns.org`
 
 ## SSH into the server
 
@@ -93,16 +93,17 @@ Install Certbot and obtain a certificate:
 
 ```bash
 sudo apt install certbot -y
-sudo certbot certonly --standalone -d team-08.ddns.net
+sudo certbot certonly --standalone -d droonidest.duckdns.org
 ```
 
 Copy certificates into the project's nginx/ssl directory:
 
 ```bash
-sudo mkdir -p ~/droonidest-deploy/nginx/ssl
-sudo cp /etc/letsencrypt/live/team-08.ddns.net/{fullchain,privkey,chain}.pem \
+mkdir -p ~/droonidest-deploy/nginx/ssl
+sudo cp /etc/letsencrypt/live/droonidest.duckdns.org/{fullchain,privkey,chain}.pem \
         ~/droonidest-deploy/nginx/ssl/
-sudo chmod 644 ~/droonidest-deploy/nginx/ssl/*.pem
+sudo chown $(whoami):$(whoami) ~/droonidest-deploy/nginx/ssl/*.pem
+chmod 644 ~/droonidest-deploy/nginx/ssl/*.pem
 ```
 
 Start everything back up:
@@ -111,7 +112,7 @@ Start everything back up:
 docker compose -f docker-compose.prod.yaml up -d
 ```
 
-The site should now be available at `https://team-08.ddns.net`. HTTP requests on port 80 are automatically redirected to HTTPS.
+The site should now be available at `https://droonidest.duckdns.org`. HTTP requests on port 80 are automatically redirected to HTTPS.
 
 ### Certificate renewal
 
@@ -119,8 +120,9 @@ Let's Encrypt certificates expire every 90 days. After auto-renewal, copy the ne
 
 ```bash
 sudo certbot renew
-sudo cp /etc/letsencrypt/live/team-08.ddns.net/{fullchain,privkey,chain}.pem \
+sudo cp /etc/letsencrypt/live/droonidest.duckdns.org/{fullchain,privkey,chain}.pem \
         ~/droonidest-deploy/nginx/ssl/
-sudo chmod 644 ~/droonidest-deploy/nginx/ssl/*.pem
+sudo chown $(whoami):$(whoami) ~/droonidest-deploy/nginx/ssl/*.pem
+chmod 644 ~/droonidest-deploy/nginx/ssl/*.pem
 cd ~/droonidest-deploy && docker compose -f docker-compose.prod.yaml restart frontend
 ```
