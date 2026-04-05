@@ -37,6 +37,7 @@ jobs:
           tar czf deployment.tar.gz \
             backend/ \
             frontend/ \
+            nginx/ \
             "$DOCKER_COMPOSE_FILE" \
             .env.production
 
