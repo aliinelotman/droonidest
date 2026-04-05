@@ -14,29 +14,48 @@ Monorepo with an Angular frontend and a Java Spring Boot backend.
 
 ## Prerequisites
 
-| Tool   | Version |
-|--------|---------|
-| Node.js | >= 22   |
-| npm     | >= 11   |
-| Java    | 21 LTS  |
-| Maven   | >= 3.9  |
+| Tool          | Version  |
+|---------------|----------|
+| Docker Desktop | latest  |
+| Node.js       | >= 22    |
+| npm           | >= 11    |
+| Java          | 21 LTS   |
+| Gradle        | >= 8     |
 
 ## Getting Started
 
-### Frontend
+### 1. Set up environment variables
+
+Copy the example env file and fill in the required values:
 
 ```bash
-cd frontend
-npm install
-npm start          # dev server on http://localhost:4200
+cp .env.example .env
 ```
 
-### Backend
+Required values to fill in:
+
+| Variable | Where to get it |
+|----------|-----------------|
+| `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google Cloud Console → Credentials → OAuth client ID |
+| `JWT_SECRET` | Generate with `openssl rand -base64 32` |
+| `S3_ACCESS_KEY` | Same value as `MINIO_ROOT_USER` |
+| `S3_SECRET_KEY` | Same value as `MINIO_ROOT_PASSWORD` |
+
+Also register `http://localhost:4200/auth/callback` as an authorized redirect URI in your Google OAuth client.
+
+### 2. Start with Docker
 
 ```bash
-cd backend
-./mvnw spring-boot:run   # dev server on http://localhost:8080
+docker compose up --build -d
 ```
+
+| Service   | URL                                    |
+|-----------|----------------------------------------|
+| Frontend  | http://localhost:4200                  |
+| Backend   | http://localhost:8080                  |
+| Swagger   | http://localhost:8080/swagger-ui.html  |
+| MinIO     | http://localhost:9001                  |
 
 ## Documentation
 
