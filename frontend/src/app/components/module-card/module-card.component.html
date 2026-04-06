@@ -3,6 +3,8 @@
     class="module-card"
     [class.module-card--disabled]="disabled"
     [routerLink]="disabled ? null : link"
+    [attr.tabindex]="disabled ? -1 : null"
+    [attr.aria-disabled]="disabled || null"
   >
     <div class="module-card__image"></div>
     <div class="module-card__content">

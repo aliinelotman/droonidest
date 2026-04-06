@@ -10,7 +10,7 @@
   <!-- Info Cards -->
   <section id="overview" class="section section--alt">
     <div class="container">
-      <div class="info-cards-grid" #fadeTarget class="fade-in info-cards-grid">
+      <div class="fade-in info-cards-grid" #fadeTarget>
         <app-info-card
           title="Precision and Power"
           body="Ründedroonid on mehitamata õhusõidukid (UAV – Unmanned Aerial Vehicle), mida kasutatakse sõjalistel eesmärkidel vaenlase sihtmärkide ründamiseks. Need võivad olla varustatud rakettide, pommide või muude relvasüsteemidega ning neid juhitakse eemalt operaatori poolt või need töötavad osaliselt autonoomselt. Ründedroonid võimaldavad sooritada täppisründeid ilma pilooti ohtu seadmata ning neid kasutatakse nii riiklike relvajõudude kui ka mitteriigiliste osalejate poolt üha sagedamini kaasaegsetes konfliktides."
@@ -32,7 +32,7 @@
 
   <!-- Narrative: Lock On -->
   <section class="section">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-narrative-section
         heading="Lock On"
         body="A mission begins long before a trigger is pulled. Intelligence analysts identify targets using satellite imagery and signals intercepts. The drone is tasked, launched, and flown to a loiter point — sometimes thousands of kilometers from its pilot. Through a satellite datalink, the operator watches, waits, and when the moment is right, executes with surgical precision. The target never sees it coming."
@@ -43,14 +43,14 @@
 
   <!-- Gallery -->
   <section id="gallery" class="section section--alt">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-gallery />
     </div>
   </section>
 
   <!-- Command & Control Narrative -->
   <section id="operations" class="section section--alt">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-narrative-section
         heading="Command and Control"
         body="Combat drone operations rely on a layered command structure linking ground control stations to relay satellites to the aircraft itself. Operators can be stationed on different continents from their drones, connected through encrypted satellite uplinks with latency measured in milliseconds. This distributed architecture makes drone operations resilient — even if one link is disrupted, the drone can follow pre-programmed waypoints until contact is re-established."
@@ -85,7 +85,7 @@
 
   <!-- Changing the Battlefield -->
   <section class="section section--alt">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-narrative-section
         heading="Changing the Battlefield"
         body="The proliferation of affordable combat drones has democratized aerial warfare. Nations and non-state actors that could never afford conventional air forces now field effective drone fleets. The 2020 Nagorno-Karabakh conflict demonstrated that a fleet of Turkish TB2 drones could neutralize armored columns and air defense systems that cost orders of magnitude more. This asymmetry is reshaping defense budgets and military doctrine worldwide."
@@ -96,7 +96,7 @@
 
   <!-- Future of Aerial Warfare -->
   <section id="future" class="section">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-narrative-section
         heading="The Future of Aerial Warfare"
         body="Next-generation combat drones will operate in coordinated swarms, sharing targeting data and autonomously distributing tasks among themselves. Loyal wingman programs pair unmanned aircraft with manned fighters, extending a pilot's sensor and weapons reach without risking additional lives. Sixth-generation air combat concepts envision optionally-manned platforms where the same airframe can fly with or without a human on board, depending on the mission risk."
@@ -108,21 +108,21 @@
 
   <!-- Closing -->
   <section class="section">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-closing-section />
     </div>
   </section>
 
   <!-- Quiz -->
   <section id="quiz" class="section section--alt">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <app-quiz />
     </div>
   </section>
 
   <!-- More Modules -->
   <section id="modules" class="section">
-    <div class="container" #fadeTarget class="fade-in container">
+    <div class="fade-in container" #fadeTarget>
       <h2 class="modules-heading">Explore More Modules</h2>
       <div class="modules-grid">
         <app-module-card

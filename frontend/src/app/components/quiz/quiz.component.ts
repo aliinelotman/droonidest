@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 
@@ -14,7 +14,7 @@ interface QuizQuestion {
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.scss',
 })
-export class QuizComponent {
+export class QuizComponent implements OnInit {
   private http = inject(HttpClient);
 
   questions: QuizQuestion[] = [];
@@ -100,6 +100,7 @@ export class QuizComponent {
   }
 
   get scorePercent(): number {
+    if (this.questions.length === 0) return 0;
     return Math.round((this.score / this.questions.length) * 100);
   }
 }

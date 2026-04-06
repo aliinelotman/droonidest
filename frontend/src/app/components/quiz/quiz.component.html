@@ -24,6 +24,7 @@
     <button
       class="quiz__submit"
       [class.quiz__submit--disabled]="!allAnswered"
+      [disabled]="!allAnswered"
       (click)="submit()"
     >
       Submit Answers

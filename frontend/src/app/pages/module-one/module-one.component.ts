@@ -22,7 +22,7 @@ import {
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
 
 @Component({
-  selector: 'module-one',
+  selector: 'app-module-one',
   standalone: true,
   imports: [
     HeroSectionComponent,
@@ -38,7 +38,7 @@ import { ModuleCardComponent } from '../../components/module-card/module-card.co
   templateUrl: './module-one.component.html',
   styleUrl: './module-one.component.scss',
 })
-export class DroneExplorerComponent implements AfterViewInit, OnDestroy {
+export class ModuleOneComponent implements AfterViewInit, OnDestroy {
   @ViewChildren('fadeTarget') fadeTargets!: QueryList<ElementRef>;
   @ViewChild('sectionNav') sectionNav!: SectionNavComponent;
 

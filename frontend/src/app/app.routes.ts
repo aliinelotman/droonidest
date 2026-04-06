@@ -5,7 +5,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./pages/module-one/module-one.component').then(
-        (m) => m.DroneExplorerComponent
+        (m) => m.ModuleOneComponent
       ),
   },
   {
