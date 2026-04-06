@@ -1,1 +1,71 @@
-/* Global styles */
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --color-bg-primary: #04070d;
+  --color-bg-alt: #0c0f13;
+  --color-accent: #f0a500;
+  --color-accent-blue: #4a90d9;
+  --color-danger: #d63031;
+  --color-text-light: #f5f5f5;
+  --color-text-muted: #a0aec0;
+  --color-text-dark: #1a1a2e;
+  --color-card-bg: rgba(255, 255, 255, 0.05);
+  --color-card-border: rgba(255, 255, 255, 0.1);
+
+  --font-display: 'Black Ops One', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --display-stretch: 1.18;
+
+  --container-max: 1200px;
+  --section-padding: 80px 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg-primary);
+  color: var(--color-text-light);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section-padding {
+  padding: var(--section-padding);
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

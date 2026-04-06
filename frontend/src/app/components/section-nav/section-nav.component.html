@@ -1,0 +1,39 @@
+<header class="topbar" [class.topbar--nav-open]="sidebarOpen">
+  <span class="topbar__title">Droonisõja ABC</span>
+</header>
+
+<button
+  class="nav-burger"
+  [class.nav-burger--open]="sidebarOpen"
+  (click)="toggleSidebar()"
+  [attr.aria-expanded]="sidebarOpen"
+  aria-label="Menüü"
+>
+  <span class="nav-burger__icon" aria-hidden="true"></span>
+</button>
+
+<nav class="nav" [class.nav--open]="sidebarOpen">
+  <ul class="nav__list">
+    @for (section of sections; track section.id) {
+      <li class="nav__item">
+        <button
+          class="nav__link"
+          [class.nav__link--active]="activeId === section.id"
+          (click)="scrollTo(section.id)"
+        >{{ section.label }}</button>
+      </li>
+    }
+    @if (moduleLinks.length) {
+      @for (link of moduleLinks; track link.route) {
+        <li class="nav__item nav__item--module">
+          <a
+            class="nav__link nav__link--module"
+            [class.nav__link--active]="link.active"
+            [routerLink]="link.route"
+            (click)="closeSidebar()"
+          >{{ link.label }}</a>
+        </li>
+      }
+    }
+  </ul>
+</nav>

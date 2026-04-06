@@ -1,0 +1,50 @@
+<div class="quiz">
+  <h2 class="quiz__title">Test Your Knowledge</h2>
+  <p class="quiz__subtitle">The Combat Drone Quiz</p>
+
+  @if (!submitted) {
+    <div class="quiz__questions">
+      @for (q of questions; track q.question; let i = $index) {
+        <div class="quiz__question">
+          <h3 class="quiz__question-text">{{ i + 1 }}. {{ q.question }}</h3>
+          <div class="quiz__options">
+            @for (option of q.options; track option; let j = $index) {
+              <button
+                class="quiz__option"
+                [class.quiz__option--selected]="selectedAnswers[i] === j"
+                (click)="selectAnswer(i, j)"
+              >
+                {{ option }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <button
+      class="quiz__submit"
+      [class.quiz__submit--disabled]="!allAnswered"
+      [disabled]="!allAnswered"
+      (click)="submit()"
+    >
+      Submit Answers
+    </button>
+  } @else {
+    <div class="quiz__results">
+      <div class="quiz__score">
+        <span class="quiz__score-value">{{ scorePercent }}%</span>
+        <span class="quiz__score-label">{{ score }} / {{ questions.length }} correct</span>
+      </div>
+      <p class="quiz__feedback">
+        @if (scorePercent === 100) {
+          Outstanding! You're a true drone warfare expert.
+        } @else if (scorePercent >= 50) {
+          Good effort! You know your way around unmanned combat.
+        } @else {
+          Keep exploring — there's much more to learn about combat drones.
+        }
+      </p>
+      <button class="quiz__submit" (click)="reset()">Try Again</button>
+    </div>
+  }
+</div>

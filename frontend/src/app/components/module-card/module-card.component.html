@@ -1,0 +1,18 @@
+<div class="module-card-wrapper">
+  <a
+    class="module-card"
+    [class.module-card--disabled]="disabled"
+    [routerLink]="disabled ? null : link"
+    [attr.tabindex]="disabled ? -1 : null"
+    [attr.aria-disabled]="disabled || null"
+  >
+    <div class="module-card__image"></div>
+    <div class="module-card__content">
+      <h3 class="module-card__headline">{{ headline }}</h3>
+      <p class="module-card__intro">{{ intro }}</p>
+    </div>
+  </a>
+  @if (disabled) {
+    <span class="module-card__badge">Available Soon</span>
+  }
+</div>

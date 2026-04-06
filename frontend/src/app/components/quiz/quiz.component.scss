@@ -1,0 +1,126 @@
+.quiz {
+  max-width: 700px;
+  margin: 0 auto;
+
+  &__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+  }
+
+  &__question {
+    margin-bottom: 32px;
+
+    &-text {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--color-text-light);
+      margin-bottom: 16px;
+    }
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__option {
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--color-accent-blue);
+      color: var(--color-text-light);
+    }
+
+    &--selected {
+      border-color: var(--color-accent);
+      background: rgba(240, 165, 0, 0.1);
+      color: var(--color-text-light);
+    }
+  }
+
+  &__submit {
+    display: block;
+    margin: 16px auto 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 14px 48px;
+    border: 2px solid var(--color-accent);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: var(--color-accent);
+      color: var(--color-text-dark);
+    }
+
+    &--disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+
+  &__results {
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+
+  &__score {
+    margin-bottom: 20px;
+
+    &-value {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1;
+    }
+
+    &-label {
+      display: block;
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      margin-top: 8px;
+    }
+  }
+
+  &__feedback {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}

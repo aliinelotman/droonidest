@@ -1,0 +1,278 @@
+$topbar-height: 56px;
+
+// ─── Top bar ──────────────────────────────────────────────────────────────────
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 400;
+  height: $topbar-height;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  transition: background 300ms ease, border-color 300ms ease;
+
+  &--nav-open {
+    background: transparent;
+    border-bottom-color: transparent;
+  }
+
+  &__title {
+    margin-left: auto;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-accent);
+  }
+}
+
+// ─── Standalone burger button (centered on blob) ──────────────────────────────
+// blob: top:8px left:8px 72x72px → center = (44px, 44px)
+.nav-burger {
+  position: fixed;
+  top: 44px;
+  left: 44px;
+  transform: translate(-50%, -50%);
+  z-index: 401;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  &__icon {
+    position: relative;
+    display: block;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+
+    &::before {
+      position: absolute;
+      content: '';
+      display: block;
+      width: 30px;
+      height: 20px;
+      top: 4px;
+      left: 0;
+      border-top: 2px solid var(--color-text-light);
+      border-bottom: 2px solid var(--color-text-light);
+      transition:
+        border-width     100ms 1500ms ease,
+        top              100ms 1600ms cubic-bezier(0.23, 1, 0.32, 1),
+        height           100ms 1600ms cubic-bezier(0.23, 1, 0.32, 1),
+        background-color 200ms ease,
+        transform        200ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    &::after {
+      position: absolute;
+      content: '';
+      display: block;
+      width: 22px;
+      height: 2px;
+      top: 14px;
+      right: 4px;
+      background-color: var(--color-text-light);
+      transition:
+        width      100ms 1750ms ease,
+        right      100ms 1750ms ease,
+        margin-top 100ms ease,
+        transform  200ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+  }
+
+  &--open &__icon {
+    &::before {
+      top: 14px;
+      transform: rotate(45deg);
+      height: 2px;
+      background-color: var(--color-text-light);
+      border-width: 0;
+      transition:
+        border-width     100ms  340ms ease,
+        top              100ms  300ms cubic-bezier(0.23, 1, 0.32, 1),
+        height           100ms  300ms cubic-bezier(0.23, 1, 0.32, 1),
+        background-color 200ms  500ms ease,
+        transform        200ms 1700ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    &::after {
+      width: 30px;
+      right: 0;
+      transform: rotate(-45deg);
+      transition:
+        width      100ms ease,
+        right      100ms ease,
+        margin-top 100ms  500ms ease,
+        transform  200ms 1700ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+  }
+}
+
+// ─── Blob morph animation ─────────────────────────────────────────────────────
+@keyframes border-morph {
+  0%,  100% { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
+  14%       { border-radius: 40% 60% 54% 46% / 49% 60% 40% 51%; }
+  28%       { border-radius: 54% 46% 38% 62% / 49% 70% 30% 51%; }
+  42%       { border-radius: 61% 39% 55% 45% / 61% 38% 62% 39%; }
+  56%       { border-radius: 61% 39% 67% 33% / 70% 50% 50% 30%; }
+  70%       { border-radius: 50% 50% 34% 66% / 56% 68% 32% 44%; }
+  84%       { border-radius: 46% 54% 50% 50% / 35% 61% 39% 65%; }
+}
+
+// ─── Nav overlay ─────────────────────────────────────────────────────────────
+.nav {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: 72px;
+  height: 72px;
+  z-index: 300;
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  background: linear-gradient(160deg, #0d1f36 0%, #0a1628 100%);
+  animation: border-morph 7s linear infinite;
+  transition:
+    top      350ms 1100ms cubic-bezier(0.23, 1, 0.32, 1),
+    left     350ms 1100ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 250ms 1100ms ease,
+    width    650ms  400ms cubic-bezier(0.23, 1, 0.32, 1),
+    height   650ms  400ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  &--open {
+    animation-play-state: paused;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200vw;
+    height: 200vh;
+    transition:
+      top       350ms  700ms cubic-bezier(0.23, 1, 0.32, 1),
+      left      350ms  700ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform  250ms  700ms ease,
+      width     750ms 1000ms cubic-bezier(0.23, 1, 0.32, 1),
+      height    750ms 1000ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  &__list {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-align: center;
+    transform: translateY(-50%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &--open &__list {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  // ── Nav items (hidden by default, stagger out on close) ────────────────────
+  &__item {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 4px 0;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(30px);
+    transition: all 250ms linear;
+
+    &:nth-child(1) { transition-delay: 200ms; }
+    &:nth-child(2) { transition-delay: 150ms; }
+    &:nth-child(3) { transition-delay: 100ms; }
+    &:nth-child(4) { transition-delay:  50ms; }
+    &:nth-child(5) { transition-delay:  25ms; }
+    &:nth-child(6) { transition-delay:  10ms; }
+    &:nth-child(7) { transition-delay:   0ms; }
+    &:nth-child(8) { transition-delay:   0ms; }
+  }
+
+  // Module links slightly smaller
+  &__item--module &__link {
+    font-size: clamp(0.8rem, 2.75vh, 1.5rem);
+    color: var(--color-text-muted);
+  }
+
+  // ── Link styling ──────────────────────────────────────────────────────────
+  &__link {
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 4.5vh, 2.5rem);
+    text-transform: uppercase;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    display: inline-block;
+    position: relative;
+    color: var(--color-text-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+    transition: color 250ms linear;
+
+    // Sweep-through hover effect
+    &::after {
+      display: block;
+      position: absolute;
+      top: 50%;
+      content: '';
+      height: 0.18em;
+      margin-top: -0.09em;
+      width: 0;
+      left: 0;
+      background-color: var(--color-accent);
+      opacity: 0.75;
+      transition: width 250ms linear;
+    }
+
+    &:hover {
+      color: var(--color-accent);
+
+      &::after {
+        width: 100%;
+      }
+    }
+
+    &--active {
+      color: var(--color-accent);
+    }
+  }
+
+  // ── Items visible when nav is open, stagger in ────────────────────────────
+  &--open &__item {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 350ms ease, transform 250ms ease;
+
+    &:nth-child(1) { transition-delay: 1400ms; }
+    &:nth-child(2) { transition-delay: 1480ms; }
+    &:nth-child(3) { transition-delay: 1560ms; }
+    &:nth-child(4) { transition-delay: 1640ms; }
+    &:nth-child(5) { transition-delay: 1720ms; }
+    &:nth-child(6) { transition-delay: 1800ms; }
+    &:nth-child(7) { transition-delay: 1880ms; }
+    &:nth-child(8) { transition-delay: 1960ms; }
+  }
+}
