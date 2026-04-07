@@ -58,7 +58,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            UUID userId = jwtService.extractUserId(claims);
+            UUID userId;
+            try {
+                userId = jwtService.extractUserId(claims);
+            } catch (IllegalArgumentException ex) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: malformed user ID");
+                return;
+            }
             String role = jwtService.extractRole(claims);
 
             if (role == null) {

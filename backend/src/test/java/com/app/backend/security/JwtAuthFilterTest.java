@@ -105,6 +105,20 @@ class JwtAuthFilterTest {
     }
 
     @Test
+    void testGivenTokenWithMalformedUserIdWhenFilterThenReturn401() throws Exception {
+        Claims claims = mock(Claims.class);
+        when(request.getHeader("Authorization")).thenReturn("Bearer access.token");
+        when(jwtService.parseToken("access.token")).thenReturn(claims);
+        when(jwtService.isAccessToken(claims)).thenReturn(true);
+        when(jwtService.extractUserId(claims)).thenThrow(new IllegalArgumentException("Invalid UUID"));
+
+        jwtAuthFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: malformed user ID");
+        verify(filterChain, never()).doFilter(any(), any());
+    }
+
+    @Test
     void testGivenTokenWithNullRoleWhenFilterThenReturn401() throws Exception {
         Claims claims = mock(Claims.class);
         when(request.getHeader("Authorization")).thenReturn("Bearer access.token");
