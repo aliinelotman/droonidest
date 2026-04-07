@@ -1,0 +1,38 @@
+<header class="header">
+  <div class="header__logo">
+    <a routerLink="/">Droonidest</a>
+  </div>
+
+  <nav class="header__nav" [class.header__nav--open]="menuOpen">
+    <a routerLink="/" class="header__nav-link">Module One</a>
+    <a routerLink="/module-two" class="header__nav-link">
+      Module Two
+      @if (!currentUser()) {
+        <span class="header__lock-icon">&#128274;</span>
+      }
+    </a>
+  </nav>
+
+  <div class="header__actions">
+    <button
+      class="header__burger"
+      (click)="toggleMenu()"
+      aria-label="Toggle menu"
+    >&#9776;</button>
+
+    @if (currentUser()) {
+      <span class="header__username">{{ currentUser()!.displayName }}</span>
+      <button
+        class="header__btn header__btn--logout"
+        data-testid="logout-btn"
+        (click)="logout()"
+      >Logout</button>
+    } @else {
+      <button
+        class="header__btn header__btn--login"
+        data-testid="login-btn"
+        (click)="login()"
+      >Login</button>
+    }
+  </div>
+</header>

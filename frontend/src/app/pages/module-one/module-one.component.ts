@@ -6,6 +6,8 @@ import {
   ViewChildren,
   ElementRef,
   ViewChild,
+  inject,
+  computed,
 } from '@angular/core';
 import { HeroSectionComponent } from '../../components/hero-section/hero-section.component';
 import { InfoCardComponent } from '../../components/info-card/info-card.component';
@@ -20,6 +22,7 @@ import {
   ModuleLink,
 } from '../../components/section-nav/section-nav.component';
 import { ModuleCardComponent } from '../../components/module-card/module-card.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-module-one',
@@ -39,11 +42,15 @@ import { ModuleCardComponent } from '../../components/module-card/module-card.co
   styleUrl: './module-one.component.scss',
 })
 export class ModuleOneComponent implements AfterViewInit, OnDestroy {
+  private readonly authService = inject(AuthService);
+
   @ViewChildren('fadeTarget') fadeTargets!: QueryList<ElementRef>;
   @ViewChild('sectionNav') sectionNav!: SectionNavComponent;
 
   private fadeObserver!: IntersectionObserver;
   private navObserver!: IntersectionObserver;
+
+  readonly isModuleTwoLocked = computed(() => !this.authService.currentUser());
 
   navSections: NavSection[] = [
     { id: 'hero', label: 'Intro' },

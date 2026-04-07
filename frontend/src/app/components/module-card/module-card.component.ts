@@ -13,4 +13,5 @@ export class ModuleCardComponent {
   @Input({ required: true }) intro!: string;
   @Input() link: string | null = null;
   @Input() disabled = false;
+  @Input() locked = false;
 }
