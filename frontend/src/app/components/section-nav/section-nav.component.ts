@@ -1,4 +1,4 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, AfterViewInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 export interface NavSection {
@@ -19,11 +19,39 @@ export interface ModuleLink {
   templateUrl: './section-nav.component.html',
   styleUrl: './section-nav.component.scss',
 })
-export class SectionNavComponent {
+export class SectionNavComponent implements AfterViewInit {
   @Input() sections: NavSection[] = [];
   @Input() moduleLinks: ModuleLink[] = [];
   activeId: string = '';
   sidebarOpen = false;
+  scrollPercent = 0;
+  exploding = false;
+
+  private readonly storageKey = 'scrollPos:';
+  private hasExploded = false;
+  private explosionTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  ngAfterViewInit(): void {
+    const saved = sessionStorage.getItem(this.storageKey + location.pathname);
+    if (saved) {
+      setTimeout(() => window.scrollTo(0, Number(saved)), 50);
+    }
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    this.scrollPercent = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+    sessionStorage.setItem(this.storageKey + location.pathname, String(window.scrollY));
+
+    if (this.scrollPercent >= 99 && !this.hasExploded) {
+      this.hasExploded = true;
+      this.exploding = true;
+      this.explosionTimeout = setTimeout(() => (this.exploding = false), 700);
+    } else if (this.scrollPercent < 95) {
+      this.hasExploded = false;
+    }
+  }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
