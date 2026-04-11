@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +56,16 @@ class AuthControllerTest {
             chain.doFilter(request, response);
             return null;
         }).when(jwtAuthFilter).doFilter(any(), any(), any());
+    }
+
+    @Test
+    void testWhenGetAuthorizeUrlThenReturnUrl() throws Exception {
+        when(authService.buildGoogleAuthorizeUrl())
+                .thenReturn("https://accounts.google.com/o/oauth2/v2/auth?client_id=abc");
+
+        mockMvc.perform(get("/api/v1/auth/google/authorize-url"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value("https://accounts.google.com/o/oauth2/v2/auth?client_id=abc"));
     }
 
     @Test

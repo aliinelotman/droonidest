@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 import java.util.UUID;
@@ -27,11 +28,31 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final String GOOGLE_AUTHORIZE_URI = "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String GOOGLE_OAUTH_SCOPES = "openid email profile";
+
     private final RestClient googleRestClient;
     private final GoogleOAuthProperties googleProperties;
     private final JwtProperties jwtProperties;
     private final JwtService jwtService;
     private final UserService userService;
+
+    /**
+     * Builds the Google OAuth 2.0 authorization URL the frontend should redirect to
+     * when initiating login. Uses the configured client ID and redirect URI.
+     */
+    public String buildGoogleAuthorizeUrl() {
+        return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZE_URI)
+                .queryParam("client_id", googleProperties.getClientId())
+                .queryParam("redirect_uri", googleProperties.getRedirectUri())
+                .queryParam("response_type", "code")
+                .queryParam("scope", GOOGLE_OAUTH_SCOPES)
+                .queryParam("access_type", "online")
+                .queryParam("prompt", "select_account")
+                .build()
+                .encode()
+                .toUriString();
+    }
 
     /**
      * Exchanges a Google authorization code for tokens, fetches the user profile,

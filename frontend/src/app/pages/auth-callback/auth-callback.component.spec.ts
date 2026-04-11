@@ -10,14 +10,20 @@ describe('AuthCallbackComponent', () => {
     closeSpy = spyOn(window, 'close');
   });
 
-  function createComponent(code: string | null) {
+  function createComponent(params: { code?: string | null; error?: string | null }) {
     TestBed.configureTestingModule({
       imports: [AuthCallbackComponent],
       providers: [
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParamMap: of({ get: (key: string) => (key === 'code' ? code : null) }),
+            queryParamMap: of({
+              get: (key: string) => {
+                if (key === 'code') return params.code ?? null;
+                if (key === 'error') return params.error ?? null;
+                return null;
+              },
+            }),
           },
         },
       ],
@@ -32,7 +38,7 @@ describe('AuthCallbackComponent', () => {
     const opener = jasmine.createSpyObj('opener', ['postMessage']);
     Object.defineProperty(window, 'opener', { value: opener, configurable: true });
 
-    createComponent('oauth-code-xyz');
+    createComponent({ code: 'oauth-code-xyz' });
 
     expect(opener.postMessage).toHaveBeenCalledWith(
       { code: 'oauth-code-xyz' },
@@ -41,13 +47,23 @@ describe('AuthCallbackComponent', () => {
     expect(closeSpy).toHaveBeenCalled();
   });
 
-  it('should close without posting when code is missing', () => {
+  it('should close without posting when Google returns an error', () => {
     const opener = jasmine.createSpyObj('opener', ['postMessage']);
     Object.defineProperty(window, 'opener', { value: opener, configurable: true });
 
-    createComponent(null);
+    createComponent({ error: 'access_denied' });
 
     expect(opener.postMessage).not.toHaveBeenCalled();
     expect(closeSpy).toHaveBeenCalled();
+  });
+
+  it('should leave popup alone when neither code nor error is present', () => {
+    const opener = jasmine.createSpyObj('opener', ['postMessage']);
+    Object.defineProperty(window, 'opener', { value: opener, configurable: true });
+
+    createComponent({});
+
+    expect(opener.postMessage).not.toHaveBeenCalled();
+    expect(closeSpy).not.toHaveBeenCalled();
   });
 });

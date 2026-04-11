@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +40,24 @@ public class AuthController {
     private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
 
     private final AuthService authService;
+
+    /**
+     * Returns the Google OAuth 2.0 authorization URL the frontend should open to
+     * initiate login. Keeps the Google client ID on the backend.
+     */
+    @Operation(
+            summary = "Get Google OAuth authorize URL",
+            description = "Returns the Google OAuth 2.0 authorization URL the frontend should open " +
+                    "to initiate login.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Authorize URL returned")
+            }
+    )
+    @SecurityRequirements
+    @GetMapping("/google/authorize-url")
+    public ResponseEntity<Map<String, String>> getGoogleAuthorizeUrl() {
+        return ResponseEntity.ok(Map.of("url", authService.buildGoogleAuthorizeUrl()));
+    }
 
     /**
      * Exchanges a Google authorization code for JWT tokens.

@@ -50,10 +50,17 @@ export class AuthService {
   }
 
   loginWithGoogle(options?: LoginOptions): void {
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    // Open the popup synchronously inside the click handler so browsers don't
+    // block it. We'll set its location once the backend returns the Google URL.
     const popup = window.open(
-      '/auth/callback',
+      'about:blank',
       '_blank',
-      'width=500,height=600,popup=true'
+      `width=${width},height=${height},left=${left},top=${top},popup=true`
     );
 
     if (!popup) {
@@ -70,15 +77,40 @@ export class AuthService {
     };
 
     window.addEventListener('message', handler);
+
+    this.http.get<{ url: string }>(`${this.apiUrl}/api/v1/auth/google/authorize-url`)
+      .pipe(take(1))
+      .subscribe({
+        next: ({ url }) => {
+          popup.location.href = url;
+        },
+        error: (err) => {
+          console.error('Failed to get Google authorize URL', err);
+          window.removeEventListener('message', handler);
+          popup.close();
+        },
+      });
   }
 
   logout(): void {
     this.accessToken = null;
     this.currentUserSignal.set(null);
 
+    // Reload to '/' after clearing the refresh cookie on the server. This gives
+    // us a clean slate regardless of which page the user was on and avoids
+    // having to track stale state across components.
     this.http.post(`${this.apiUrl}/api/v1/auth/logout`, {})
       .pipe(take(1))
-      .subscribe();
+      .subscribe({
+        next: () => this.reloadToRoot(),
+        error: () => this.reloadToRoot(),
+      });
+  }
+
+  // Wrapped in a method so tests can spy on it (window.location.assign isn't
+  // spyable in Jasmine because its descriptor isn't writable).
+  protected reloadToRoot(): void {
+    window.location.assign('/');
   }
 
   private exchangeCode(code: string, redirectTo?: string): void {

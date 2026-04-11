@@ -78,6 +78,23 @@ class AuthServiceTest {
         lenient().when(getSpec.retrieve()).thenReturn(getResponseSpec);
     }
 
+    // --- buildGoogleAuthorizeUrl ---
+
+    @Test
+    void testWhenBuildGoogleAuthorizeUrlThenReturnsUrlWithRequiredParams() {
+        when(googleProperties.getClientId()).thenReturn("test-client-id");
+        when(googleProperties.getRedirectUri()).thenReturn("http://localhost:4200/auth/callback");
+
+        String url = authService.buildGoogleAuthorizeUrl();
+
+        assertThat(url).startsWith("https://accounts.google.com/o/oauth2/v2/auth");
+        assertThat(url).contains("client_id=test-client-id");
+        assertThat(url).contains("redirect_uri=http://localhost:4200/auth/callback");
+        assertThat(url).contains("response_type=code");
+        assertThat(url).contains("scope=openid%20email%20profile");
+        assertThat(url).contains("prompt=select_account");
+    }
+
     // --- authenticateWithGoogle ---
 
     @Test

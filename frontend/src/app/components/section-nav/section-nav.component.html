@@ -40,8 +40,8 @@
 
 <nav class="nav" [class.nav--open]="sidebarOpen">
   <ul class="nav__list">
-    @for (section of sections; track section.id) {
-      <li class="nav__item">
+    @for (section of sections; track section.id; let i = $index) {
+      <li class="nav__item" [style.--i]="i">
         <button
           class="nav__link"
           [class.nav__link--active]="activeId === section.id"
@@ -49,9 +49,16 @@
         >{{ section.label }}</button>
       </li>
     }
+    <li class="nav__item" [style.--i]="sections.length">
+      @if (currentUser()) {
+        <button class="nav__link" (click)="logout()">Logout</button>
+      } @else {
+        <button class="nav__link" (click)="login()">Login</button>
+      }
+    </li>
     @if (moduleLinks.length) {
-      @for (link of moduleLinks; track link.route) {
-        <li class="nav__item nav__item--module">
+      @for (link of moduleLinks; track link.route; let i = $index) {
+        <li class="nav__item nav__item--module" [style.--i]="sections.length + 1 + i">
           <a
             class="nav__link nav__link--module"
             [class.nav__link--active]="link.active"
@@ -61,13 +68,5 @@
         </li>
       }
     }
-    <li class="nav__item nav__item--auth">
-      @if (currentUser()) {
-        <span class="nav__username">{{ currentUser()!.displayName }}</span>
-        <button class="nav__link nav__link--auth" (click)="logout()">Logout</button>
-      } @else {
-        <button class="nav__link nav__link--auth" (click)="login()">Login</button>
-      }
-    </li>
   </ul>
 </nav>
