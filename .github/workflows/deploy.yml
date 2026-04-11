@@ -74,6 +74,34 @@ jobs:
           docker compose -f docker-compose.prod.yaml build --no-cache
           docker compose -f docker-compose.prod.yaml up -d
 
+          echo "Waiting for backend health..."
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+            CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
+            if [ -n "$CID" ]; then
+              HS=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CID" 2>/dev/null || echo unknown)
+              if [ "$HS" = "healthy" ]; then
+                echo "Backend is healthy."
+                break
+              fi
+              if [ "$HS" = "unhealthy" ]; then
+                echo "Backend became unhealthy. Recent logs:"
+                docker compose -f docker-compose.prod.yaml logs backend --tail=200
+                exit 1
+              fi
+            fi
+            sleep 5
+          done
+
+          CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
+          if [ -n "$CID" ]; then
+            HS=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CID" 2>/dev/null || echo unknown)
+            if [ "$HS" != "healthy" ]; then
+              echo "Backend not healthy after wait (status=$HS). Recent logs:"
+              docker compose -f docker-compose.prod.yaml logs backend --tail=200
+              exit 1
+            fi
+          fi
+
           echo "Deployment complete!"
           docker compose -f docker-compose.prod.yaml ps
           EOF
