@@ -71,36 +71,49 @@ jobs:
           fi
 
           docker compose -f docker-compose.prod.yaml down
-          docker compose -f docker-compose.prod.yaml build --no-cache
-          docker compose -f docker-compose.prod.yaml up -d
 
-          echo "Waiting for backend health..."
-          for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
-            CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
-            if [ -n "$CID" ]; then
-              HS=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CID" 2>/dev/null || echo unknown)
-              if [ "$HS" = "healthy" ]; then
-                echo "Backend is healthy."
-                break
-              fi
-              if [ "$HS" = "unhealthy" ]; then
-                echo "Backend became unhealthy. Recent logs:"
-                docker compose -f docker-compose.prod.yaml logs backend --tail=200
-                exit 1
-              fi
-            fi
+          docker compose -f docker-compose.prod.yaml build --no-cache
+
+          echo "Starting infrastructure services..."
+          docker compose -f docker-compose.prod.yaml up -d postgres minio
+          sleep 10
+
+          echo "Starting backend..."
+          docker compose -f docker-compose.prod.yaml up -d backend
+          echo "Waiting for backend to become healthy (up to 2 min)..."
+          for i in $(seq 1 24); do
             sleep 5
+            CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
+            if [ -z "$CID" ]; then
+              echo "  backend container not found"
+              continue
+            fi
+            STATUS=$(docker inspect --format='{{.State.Status}}' "$CID" 2>/dev/null || echo unknown)
+            HEALTH=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$CID" 2>/dev/null || echo unknown)
+            echo "  [$i] container=$STATUS health=$HEALTH"
+            if [ "$HEALTH" = "healthy" ]; then
+              echo "Backend is healthy!"
+              break
+            fi
+            if [ "$STATUS" = "exited" ] || [ "$STATUS" = "dead" ]; then
+              echo "ERROR: Backend container exited. Logs:"
+              docker compose -f docker-compose.prod.yaml logs backend --tail=300
+              exit 1
+            fi
           done
 
           CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
-          if [ -n "$CID" ]; then
-            HS=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CID" 2>/dev/null || echo unknown)
-            if [ "$HS" != "healthy" ]; then
-              echo "Backend not healthy after wait (status=$HS). Recent logs:"
-              docker compose -f docker-compose.prod.yaml logs backend --tail=200
-              exit 1
-            fi
+          HEALTH=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$CID" 2>/dev/null || echo unknown)
+          if [ "$HEALTH" != "healthy" ]; then
+            echo "ERROR: Backend not healthy after wait (health=$HEALTH). Logs:"
+            docker compose -f docker-compose.prod.yaml logs backend --tail=300
+            echo "--- healthcheck log ---"
+            docker inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' "$CID" 2>/dev/null || true
+            exit 1
           fi
+
+          echo "Starting frontend..."
+          docker compose -f docker-compose.prod.yaml up -d frontend
 
           echo "Deployment complete!"
           docker compose -f docker-compose.prod.yaml ps
