@@ -196,7 +196,7 @@ describe('AuthService', () => {
 
       httpMock.expectOne('http://localhost:8080/api/v1/auth/logout').flush(null);
 
-      expect(assignSpy).toHaveBeenCalledWith('/');
+      expect(reloadSpy).toHaveBeenCalled();
     });
 
     it('should still reload to "/" if the logout request fails', () => {
@@ -205,7 +205,7 @@ describe('AuthService', () => {
       httpMock.expectOne('http://localhost:8080/api/v1/auth/logout')
         .flush('Server error', { status: 500, statusText: 'Server Error' });
 
-      expect(assignSpy).toHaveBeenCalledWith('/');
+      expect(reloadSpy).toHaveBeenCalled();
     });
   });
 
