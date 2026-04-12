@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +26,7 @@ import java.util.UUID;
  * Intercepts each request, extracts and validates the JWT from the Authorization header,
  * and populates the SecurityContext with the authenticated user.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -53,6 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Claims claims = jwtService.parseToken(token);
 
         if (claims == null || !jwtService.isAccessToken(claims)) {
+            log.warn("Rejected token from {}: invalid or wrong token type", request.getRemoteAddr());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
             return;
         }
@@ -74,6 +77,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             Optional<User> maybeUser = userRepository.findById(userId);
             if (maybeUser.isEmpty()) {
+                log.warn("Rejected token from {}: user {} not found or deleted", request.getRemoteAddr(), userId);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
                 return;
             }

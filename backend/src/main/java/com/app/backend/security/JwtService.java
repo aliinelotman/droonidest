@@ -23,7 +23,6 @@ import java.util.UUID;
 public class JwtService {
 
     private static final String CLAIM_ROLE = "role";
-    private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_TOKEN_TYPE = "type";
     private static final String TOKEN_TYPE_ACCESS = "access";
     private static final String TOKEN_TYPE_REFRESH = "refresh";
@@ -60,6 +59,7 @@ public class JwtService {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + STATE_TOKEN_EXPIRATION_MS);
         return Jwts.builder()
+                .subject(UUID.randomUUID().toString())
                 .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_STATE)
                 .issuedAt(now)
                 .expiration(expiry)
@@ -120,7 +120,6 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(user.getId().toString())
-                .claim(CLAIM_EMAIL, user.getEmail())
                 .claim(CLAIM_ROLE, user.getRole().name())
                 .claim(CLAIM_TOKEN_TYPE, tokenType)
                 .issuedAt(now)

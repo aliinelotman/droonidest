@@ -29,8 +29,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidToken(InvalidTokenException ex) {
+        log.warn("Authentication failure: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(errorBody("UNAUTHORIZED", ex.getMessage()));
+                .body(errorBody("UNAUTHORIZED", "Authentication failed"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

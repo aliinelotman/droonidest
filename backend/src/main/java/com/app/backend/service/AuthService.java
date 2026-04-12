@@ -165,6 +165,7 @@ public class AuthService {
     }
 
     private AuthResponse buildAuthResponse(User user) {
+        log.info("User authenticated via Google: id={} email={}", user.getId(), user.getEmail());
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new AuthResponse(accessToken, userService.toResponse(user), refreshToken);
