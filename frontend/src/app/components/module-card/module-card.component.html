@@ -2,9 +2,11 @@
   <a
     class="module-card"
     [class.module-card--disabled]="disabled"
-    [routerLink]="disabled ? null : link"
+    [class.module-card--locked]="locked"
+    [routerLink]="disabled || locked ? null : link"
     [attr.tabindex]="disabled ? -1 : null"
     [attr.aria-disabled]="disabled || null"
+    (click)="onCardClick($event)"
   >
     <div class="module-card__image"></div>
     <div class="module-card__content">
@@ -16,6 +18,8 @@
     <span class="module-card__badge">Available Soon</span>
   }
   @if (locked) {
-    <span class="module-card__badge module-card__badge--locked">&#128274; Login required</span>
+    <button class="module-card__badge module-card__badge--locked" (click)="loginRequested.emit()">
+      &#128274; Login required
+    </button>
   }
 </div>

@@ -42,7 +42,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './module-one.component.scss',
 })
 export class ModuleOneComponent implements AfterViewInit, OnDestroy {
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
 
   @ViewChildren('fadeTarget') fadeTargets!: QueryList<ElementRef>;
   @ViewChild('sectionNav') sectionNav!: SectionNavComponent;

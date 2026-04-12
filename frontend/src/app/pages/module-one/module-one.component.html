@@ -130,6 +130,7 @@
           intro="Continue your journey into the world of unmanned aerial systems."
           link="/module-two"
           [locked]="isModuleTwoLocked()"
+          (loginRequested)="authService.loginWithGoogle()"
         />
         <app-module-card
           headline="Module Three"

@@ -78,9 +78,12 @@ export class AuthService {
       this.exchangeCode(event.data.code, event.data.state, options?.redirectTo);
     };
 
-    // Clean up the message listener if the user closes the popup without logging in.
+    // Clean up the message listener if the user closes the popup without logging in,
+    // or after a 10-minute hard cap so the interval never runs indefinitely.
+    const POPUP_TIMEOUT_MS = 10 * 60 * 1_000;
+    const startedAt = Date.now();
     const closeInterval = setInterval(() => {
-      if (!popup || popup.closed) {
+      if (popup.closed || Date.now() - startedAt > POPUP_TIMEOUT_MS) {
         clearInterval(closeInterval);
         window.removeEventListener('message', handler);
       }
@@ -92,6 +95,13 @@ export class AuthService {
       .pipe(take(1))
       .subscribe({
         next: ({ url }) => {
+          if (!url.startsWith('https://accounts.google.com/')) {
+            console.error('Unexpected authorize URL origin, aborting login');
+            clearInterval(closeInterval);
+            window.removeEventListener('message', handler);
+            popup.close();
+            return;
+          }
           popup.location.href = url;
         },
         error: (err) => {
