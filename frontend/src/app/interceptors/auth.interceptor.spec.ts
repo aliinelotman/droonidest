@@ -46,7 +46,7 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
-  it('should call logout on 401 response', () => {
+  it('should call logout on 401 when access token is present', () => {
     authService.getAccessToken.and.returnValue('expired-token');
 
     http.get('/api/protected').subscribe({ error: () => {} });
@@ -55,5 +55,16 @@ describe('authInterceptor', () => {
       .flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     expect(authService.logout).toHaveBeenCalled();
+  });
+
+  it('should not call logout on 401 when no access token (e.g. failed refresh on page load)', () => {
+    authService.getAccessToken.and.returnValue(null);
+
+    http.post('/api/v1/auth/refresh', {}).subscribe({ error: () => {} });
+
+    httpMock.expectOne('/api/v1/auth/refresh')
+      .flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(authService.logout).not.toHaveBeenCalled();
   });
 });
