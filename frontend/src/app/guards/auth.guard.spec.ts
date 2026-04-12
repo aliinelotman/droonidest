@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { authGuard } from './auth.guard';
 import { AuthService, UserResponse } from '../services/auth.service';
 
@@ -10,10 +10,13 @@ const mockUser: UserResponse = {
 
 describe('authGuard', () => {
   let authService: jasmine.SpyObj<AuthService>;
+  let currentUserSignal: WritableSignal<UserResponse | null>;
 
   beforeEach(() => {
+    currentUserSignal = signal<UserResponse | null>(null);
+
     authService = jasmine.createSpyObj('AuthService', [], {
-      currentUser: signal<UserResponse | null>(null),
+      currentUser: currentUserSignal.asReadonly(),
     });
 
     TestBed.configureTestingModule({
@@ -25,9 +28,7 @@ describe('authGuard', () => {
   });
 
   it('should return true when user is authenticated', () => {
-    Object.defineProperty(authService, 'currentUser', {
-      get: () => signal(mockUser),
-    });
+    currentUserSignal.set(mockUser);
 
     const result = TestBed.runInInjectionContext(() =>
       authGuard({} as any, {} as RouterStateSnapshot)
