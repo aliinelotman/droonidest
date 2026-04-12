@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlSegment, provideRouter } from '@angular/router';
+import { RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { authGuard } from './auth.guard';
 import { AuthService, UserResponse } from '../services/auth.service';
@@ -10,10 +10,9 @@ const mockUser: UserResponse = {
 
 describe('authGuard', () => {
   let authService: jasmine.SpyObj<AuthService>;
-  let route: ActivatedRouteSnapshot;
 
   beforeEach(() => {
-    authService = jasmine.createSpyObj('AuthService', ['loginWithGoogle'], {
+    authService = jasmine.createSpyObj('AuthService', [], {
       currentUser: signal<UserResponse | null>(null),
     });
 
@@ -23,8 +22,6 @@ describe('authGuard', () => {
         provideRouter([]),
       ],
     });
-
-    route = { url: [{ path: 'module-two' } as UrlSegment] } as ActivatedRouteSnapshot;
   });
 
   it('should return true when user is authenticated', () => {
@@ -33,20 +30,26 @@ describe('authGuard', () => {
     });
 
     const result = TestBed.runInInjectionContext(() =>
-      authGuard(route, {} as RouterStateSnapshot)
+      authGuard({} as any, {} as RouterStateSnapshot)
     );
 
     expect(result).toBeTrue();
   });
 
-  it('should return false and call loginWithGoogle when unauthenticated', () => {
+  it('should redirect to "/" when unauthenticated', () => {
     const result = TestBed.runInInjectionContext(() =>
-      authGuard(route, {} as RouterStateSnapshot)
+      authGuard({} as any, {} as RouterStateSnapshot)
     );
 
-    expect(result).toBeFalse();
-    expect(authService.loginWithGoogle).toHaveBeenCalledWith({
-      redirectTo: '/module-two',
-    });
+    expect(result).toBeInstanceOf(UrlTree);
+    expect((result as UrlTree).toString()).toBe('/');
+  });
+
+  it('should not call loginWithGoogle when unauthenticated', () => {
+    TestBed.runInInjectionContext(() =>
+      authGuard({} as any, {} as RouterStateSnapshot)
+    );
+
+    expect(authService.loginWithGoogle).toBeUndefined();
   });
 });
