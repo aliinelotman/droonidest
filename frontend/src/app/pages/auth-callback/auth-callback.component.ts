@@ -14,6 +14,7 @@ export class AuthCallbackComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.pipe(take(1)).subscribe((params) => {
       const code = params.get('code');
+      const state = params.get('state');
       const error = params.get('error');
 
       // Only act when we're the OAuth return trip — either a code or an error
@@ -23,7 +24,7 @@ export class AuthCallbackComponent implements OnInit {
       }
 
       if (code && window.opener) {
-        window.opener.postMessage({ code }, window.location.origin);
+        window.opener.postMessage({ code, state }, window.location.origin);
       }
       window.close();
     });

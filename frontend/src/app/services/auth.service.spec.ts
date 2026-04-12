@@ -129,12 +129,12 @@ describe('AuthService', () => {
       expect(capturedHandler).toBeDefined();
 
       capturedHandler!(new MessageEvent('message', {
-        data: { code: 'oauth-code-abc' },
+        data: { code: 'oauth-code-abc', state: 'state-token-xyz' },
         origin: window.location.origin,
       }));
 
       const req = httpMock.expectOne('http://localhost:8080/api/v1/auth/google');
-      expect(req.request.body).toEqual({ code: 'oauth-code-abc' });
+      expect(req.request.body).toEqual({ code: 'oauth-code-abc', state: 'state-token-xyz' });
       req.flush({ accessToken: 'new-token', user: mockUser });
 
       await Promise.resolve();
@@ -158,7 +158,7 @@ describe('AuthService', () => {
         .flush({ url: 'https://accounts.google.com/o/oauth2/v2/auth?client_id=abc' });
 
       capturedHandler!(new MessageEvent('message', {
-        data: { code: 'oauth-code-abc' },
+        data: { code: 'oauth-code-abc', state: 'state-token-xyz' },
         origin: 'https://evil.com',
       }));
 

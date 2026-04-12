@@ -10,7 +10,7 @@ describe('AuthCallbackComponent', () => {
     closeSpy = spyOn(window, 'close');
   });
 
-  function createComponent(params: { code?: string | null; error?: string | null }) {
+  function createComponent(params: { code?: string | null; error?: string | null; state?: string | null }) {
     TestBed.configureTestingModule({
       imports: [AuthCallbackComponent],
       providers: [
@@ -21,6 +21,7 @@ describe('AuthCallbackComponent', () => {
               get: (key: string) => {
                 if (key === 'code') return params.code ?? null;
                 if (key === 'error') return params.error ?? null;
+                if (key === 'state') return params.state ?? null;
                 return null;
               },
             }),
@@ -34,14 +35,14 @@ describe('AuthCallbackComponent', () => {
     return fixture;
   }
 
-  it('should post code to opener and close when code is present', () => {
+  it('should post code and state to opener and close when code is present', () => {
     const opener = jasmine.createSpyObj('opener', ['postMessage']);
     Object.defineProperty(window, 'opener', { value: opener, configurable: true });
 
-    createComponent({ code: 'oauth-code-xyz' });
+    createComponent({ code: 'oauth-code-xyz', state: 'state-token-abc' });
 
     expect(opener.postMessage).toHaveBeenCalledWith(
-      { code: 'oauth-code-xyz' },
+      { code: 'oauth-code-xyz', state: 'state-token-abc' },
       window.location.origin
     );
     expect(closeSpy).toHaveBeenCalled();

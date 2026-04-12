@@ -29,6 +29,7 @@ export class AuthService {
   private readonly apiUrl = environment.apiUrl;
 
   private accessToken: string | null = null;
+  private isLoggingOut = false;
   private readonly currentUserSignal = signal<UserResponse | null>(null);
 
   readonly currentUser = this.currentUserSignal.asReadonly();
@@ -70,11 +71,20 @@ export class AuthService {
 
     const handler = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-      if (!event.data?.code) return;
+      if (!event.data?.code || !event.data?.state) return;
 
+      clearInterval(closeInterval);
       window.removeEventListener('message', handler);
-      this.exchangeCode(event.data.code, options?.redirectTo);
+      this.exchangeCode(event.data.code, event.data.state, options?.redirectTo);
     };
+
+    // Clean up the message listener if the user closes the popup without logging in.
+    const closeInterval = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(closeInterval);
+        window.removeEventListener('message', handler);
+      }
+    }, 500);
 
     window.addEventListener('message', handler);
 
@@ -86,6 +96,7 @@ export class AuthService {
         },
         error: (err) => {
           console.error('Failed to get Google authorize URL', err);
+          clearInterval(closeInterval);
           window.removeEventListener('message', handler);
           popup.close();
         },
@@ -93,6 +104,9 @@ export class AuthService {
   }
 
   logout(): void {
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+
     this.accessToken = null;
     this.currentUserSignal.set(null);
 
@@ -113,8 +127,8 @@ export class AuthService {
     window.location.assign('/');
   }
 
-  private exchangeCode(code: string, redirectTo?: string): void {
-    this.http.post<AuthTokenResponse>(`${this.apiUrl}/api/v1/auth/google`, { code })
+  private exchangeCode(code: string, state: string, redirectTo?: string): void {
+    this.http.post<AuthTokenResponse>(`${this.apiUrl}/api/v1/auth/google`, { code, state })
       .pipe(take(1))
       .subscribe({
         next: ({ accessToken, user }) => {
