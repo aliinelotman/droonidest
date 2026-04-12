@@ -39,26 +39,31 @@ public class AuthService {
 
     /**
      * Builds the Google OAuth 2.0 authorization URL the frontend should redirect to
-     * when initiating login. Uses the configured client ID and redirect URI.
+     * when initiating login. Includes a signed state token for CSRF protection.
      */
     public String buildGoogleAuthorizeUrl() {
+        String state = jwtService.generateStateToken();
         return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZE_URI)
-                .queryParam("client_id", googleProperties.getClientId())
-                .queryParam("redirect_uri", googleProperties.getRedirectUri())
+                .queryParam("client_id", googleProperties.clientId())
+                .queryParam("redirect_uri", googleProperties.redirectUri())
                 .queryParam("response_type", "code")
                 .queryParam("scope", GOOGLE_OAUTH_SCOPES)
                 .queryParam("access_type", "online")
                 .queryParam("prompt", "select_account")
+                .queryParam("state", state)
                 .build()
                 .encode()
                 .toUriString();
     }
 
     /**
-     * Exchanges a Google authorization code for tokens, fetches the user profile,
-     * finds or creates the user in the database, and returns JWT tokens.
+     * Validates the OAuth state token, exchanges the authorization code for tokens,
+     * fetches the user profile, finds or creates the user, and returns JWT tokens.
+     *
+     * @throws InvalidTokenException if the state token is invalid or expired
      */
-    public AuthResponse authenticateWithGoogle(String authorizationCode) {
+    public AuthResponse authenticateWithGoogle(String authorizationCode, String state) {
+        validateOAuthState(state);
         String googleAccessToken = exchangeCodeForAccessToken(authorizationCode);
         Map<String, Object> userInfo = fetchGoogleUserInfo(googleAccessToken);
         User user = resolveUser(userInfo);
@@ -66,9 +71,9 @@ public class AuthService {
     }
 
     /**
-     * Validates a refresh token, issues a new access token, and returns the user profile.
-     * The user profile is included so the frontend can restore session state on page reload
-     * without a separate profile fetch.
+     * Validates a refresh token, issues a new access token and rotated refresh token,
+     * and returns the user profile. The user profile is included so the frontend can
+     * restore session state on page reload without a separate profile fetch.
      *
      * @throws InvalidTokenException if the token is invalid or not a refresh token
      */
@@ -82,7 +87,8 @@ public class AuthService {
         UUID userId = jwtService.extractUserId(claims);
         User user = userService.findById(userId);
         String accessToken = jwtService.generateAccessToken(user);
-        return new AuthResponse(accessToken, userService.toResponse(user), null);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+        return new AuthResponse(accessToken, userService.toResponse(user), newRefreshToken);
     }
 
     /**
@@ -92,16 +98,23 @@ public class AuthService {
         return jwtProperties.getRefreshTokenExpiration() / 1000;
     }
 
+    private void validateOAuthState(String state) {
+        var claims = jwtService.parseToken(state);
+        if (claims == null || !jwtService.isStateToken(claims)) {
+            throw new InvalidTokenException("Invalid or expired OAuth state");
+        }
+    }
+
     private String exchangeCodeForAccessToken(String code) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("code", code);
-        formData.add("client_id", googleProperties.getClientId());
-        formData.add("client_secret", googleProperties.getClientSecret());
-        formData.add("redirect_uri", googleProperties.getRedirectUri());
+        formData.add("client_id", googleProperties.clientId());
+        formData.add("client_secret", googleProperties.clientSecret());
+        formData.add("redirect_uri", googleProperties.redirectUri());
         formData.add("grant_type", "authorization_code");
 
         Map<String, Object> tokenResponse = googleRestClient.post()
-                .uri(googleProperties.getTokenUri())
+                .uri(googleProperties.tokenUri())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(formData)
                 .retrieve()
@@ -121,7 +134,7 @@ public class AuthService {
 
     private Map<String, Object> fetchGoogleUserInfo(String accessToken) {
         Map<String, Object> userInfo = googleRestClient.get()
-                .uri(googleProperties.getUserinfoUri())
+                .uri(googleProperties.userinfoUri())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});

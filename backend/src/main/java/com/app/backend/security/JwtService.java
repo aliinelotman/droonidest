@@ -27,6 +27,8 @@ public class JwtService {
     private static final String CLAIM_TOKEN_TYPE = "type";
     private static final String TOKEN_TYPE_ACCESS = "access";
     private static final String TOKEN_TYPE_REFRESH = "refresh";
+    private static final String TOKEN_TYPE_STATE = "state";
+    private static final long STATE_TOKEN_EXPIRATION_MS = 10 * 60 * 1_000L;
 
     private final JwtProperties jwtProperties;
     private SecretKey signingKey;
@@ -49,6 +51,27 @@ public class JwtService {
      */
     public String generateRefreshToken(User user) {
         return buildToken(user, TOKEN_TYPE_REFRESH, jwtProperties.getRefreshTokenExpiration());
+    }
+
+    /**
+     * Generates a short-lived state token for OAuth CSRF protection.
+     */
+    public String generateStateToken() {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + STATE_TOKEN_EXPIRATION_MS);
+        return Jwts.builder()
+                .claim(CLAIM_TOKEN_TYPE, TOKEN_TYPE_STATE)
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(signingKey)
+                .compact();
+    }
+
+    /**
+     * Returns true if the claims represent a state token.
+     */
+    public boolean isStateToken(Claims claims) {
+        return TOKEN_TYPE_STATE.equals(claims.get(CLAIM_TOKEN_TYPE, String.class));
     }
 
     /**

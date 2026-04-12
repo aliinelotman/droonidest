@@ -85,8 +85,8 @@ public class AuthController {
             @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response) {
 
-        AuthResponse authResponse = authService.authenticateWithGoogle(request.getCode());
-        setRefreshTokenCookie(response, authResponse.getRefreshToken());
+        AuthResponse authResponse = authService.authenticateWithGoogle(request.code(), request.state());
+        setRefreshTokenCookie(response, authResponse.refreshToken());
         return ResponseEntity.ok(authResponse);
     }
 
@@ -103,12 +103,13 @@ public class AuthController {
     )
     @SecurityRequirements
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshTokenFromCookies(request)
                 .orElseThrow(() -> new InvalidTokenException("Refresh token cookie not found"));
 
-        AuthResponse response = authService.refreshAuth(refreshToken);
-        return ResponseEntity.ok(response);
+        AuthResponse authResponse = authService.refreshAuth(refreshToken);
+        setRefreshTokenCookie(response, authResponse.refreshToken());
+        return ResponseEntity.ok(authResponse);
     }
 
     /**
