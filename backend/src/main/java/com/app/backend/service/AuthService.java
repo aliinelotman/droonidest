@@ -66,11 +66,13 @@ public class AuthService {
     }
 
     /**
-     * Validates a refresh token and issues a new access token.
+     * Validates a refresh token, issues a new access token, and returns the user profile.
+     * The user profile is included so the frontend can restore session state on page reload
+     * without a separate profile fetch.
      *
      * @throws InvalidTokenException if the token is invalid or not a refresh token
      */
-    public String refreshAccessToken(String refreshToken) {
+    public AuthResponse refreshAuth(String refreshToken) {
         var claims = jwtService.parseToken(refreshToken);
 
         if (claims == null || !jwtService.isRefreshToken(claims)) {
@@ -79,7 +81,8 @@ public class AuthService {
 
         UUID userId = jwtService.extractUserId(claims);
         User user = userService.findById(userId);
-        return jwtService.generateAccessToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
+        return new AuthResponse(accessToken, userService.toResponse(user), null);
     }
 
     /**

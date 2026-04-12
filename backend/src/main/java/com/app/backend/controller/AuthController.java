@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,9 @@ public class AuthController {
     private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
 
     private final AuthService authService;
+
+    @Value("${auth.cookie.secure:true}")
+    private boolean secureCookie;
 
     /**
      * Returns the Google OAuth 2.0 authorization URL the frontend should open to
@@ -99,12 +103,12 @@ public class AuthController {
     )
     @SecurityRequirements
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request) {
         String refreshToken = extractRefreshTokenFromCookies(request)
                 .orElseThrow(() -> new InvalidTokenException("Refresh token cookie not found"));
 
-        String newAccessToken = authService.refreshAccessToken(refreshToken);
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        AuthResponse response = authService.refreshAuth(refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -127,7 +131,7 @@ public class AuthController {
     private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
                 .httpOnly(true)
-                .secure(true)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/api/v1/auth")
                 .maxAge(authService.getRefreshTokenMaxAgeSeconds())
@@ -138,7 +142,7 @@ public class AuthController {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/api/v1/auth")
                 .maxAge(0)

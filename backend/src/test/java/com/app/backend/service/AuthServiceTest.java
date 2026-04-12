@@ -143,10 +143,10 @@ class AuthServiceTest {
                 .hasMessageContaining("Failed to exchange authorization code with Google");
     }
 
-    // --- refreshAccessToken ---
+    // --- refreshAuth ---
 
     @Test
-    void testGivenValidRefreshTokenWhenRefreshThenReturnNewAccessToken() {
+    void testGivenValidRefreshTokenWhenRefreshThenReturnAccessTokenAndUser() {
         Claims mockClaims = mock(Claims.class);
 
         when(jwtService.parseToken("valid-refresh-token")).thenReturn(mockClaims);
@@ -154,15 +154,24 @@ class AuthServiceTest {
         when(jwtService.extractUserId(mockClaims)).thenReturn(TEST_USER_ID);
         when(userService.findById(TEST_USER_ID)).thenReturn(testUser);
         when(jwtService.generateAccessToken(testUser)).thenReturn("new-access-token");
+        when(userService.toResponse(testUser)).thenReturn(
+                new com.app.backend.dto.response.UserResponse(
+                        TEST_USER_ID, "test@example.com", "Test User", null,
+                        com.app.backend.model.enums.UserRole.USER));
 
-        assertThat(authService.refreshAccessToken("valid-refresh-token")).isEqualTo("new-access-token");
+        AuthResponse result = authService.refreshAuth("valid-refresh-token");
+
+        assertThat(result.getAccessToken()).isEqualTo("new-access-token");
+        assertThat(result.getUser()).isNotNull();
+        assertThat(result.getUser().getEmail()).isEqualTo("test@example.com");
+        assertThat(result.getRefreshToken()).isNull();
     }
 
     @Test
     void testGivenInvalidTokenWhenRefreshThenThrowInvalidTokenException() {
         when(jwtService.parseToken("invalid-token")).thenReturn(null);
 
-        assertThatThrownBy(() -> authService.refreshAccessToken("invalid-token"))
+        assertThatThrownBy(() -> authService.refreshAuth("invalid-token"))
                 .isInstanceOf(InvalidTokenException.class)
                 .hasMessageContaining("Invalid or expired refresh token");
     }
@@ -174,7 +183,7 @@ class AuthServiceTest {
         when(jwtService.parseToken("access-token")).thenReturn(mockClaims);
         when(jwtService.isRefreshToken(mockClaims)).thenReturn(false);
 
-        assertThatThrownBy(() -> authService.refreshAccessToken("access-token"))
+        assertThatThrownBy(() -> authService.refreshAuth("access-token"))
                 .isInstanceOf(InvalidTokenException.class);
     }
 

@@ -1,3 +1,7 @@
 spring:
   jpa:
     show-sql: true
+
+auth:
+  cookie:
+    secure: false

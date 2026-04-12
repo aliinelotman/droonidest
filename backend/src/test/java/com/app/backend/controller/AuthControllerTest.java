@@ -104,13 +104,18 @@ class AuthControllerTest {
     }
 
     @Test
-    void testGivenValidCookieWhenRefreshThenReturnNewAccessToken() throws Exception {
-        when(authService.refreshAccessToken("valid-refresh-token")).thenReturn("new-access-token");
+    void testGivenValidCookieWhenRefreshThenReturnAccessTokenAndUser() throws Exception {
+        UserResponse userResponse = new UserResponse(
+                UUID.randomUUID(), "test@example.com", "Test User", null, UserRole.USER);
+        AuthResponse authResponse = new AuthResponse("new-access-token", userResponse, null);
+
+        when(authService.refreshAuth("valid-refresh-token")).thenReturn(authResponse);
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                         .cookie(new Cookie("refresh_token", "valid-refresh-token")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("new-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.user.email").value("test@example.com"));
     }
 
     @Test
@@ -121,7 +126,7 @@ class AuthControllerTest {
 
     @Test
     void testGivenInvalidTokenWhenRefreshThenReturnUnauthorized() throws Exception {
-        when(authService.refreshAccessToken("bad-token"))
+        when(authService.refreshAuth("bad-token"))
                 .thenThrow(new InvalidTokenException("Invalid or expired refresh token"));
 
         mockMvc.perform(post("/api/v1/auth/refresh")
