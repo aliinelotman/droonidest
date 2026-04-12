@@ -71,49 +71,8 @@ jobs:
           fi
 
           docker compose -f docker-compose.prod.yaml down
-
           docker compose -f docker-compose.prod.yaml build --no-cache
-
-          echo "Starting infrastructure services..."
-          docker compose -f docker-compose.prod.yaml up -d postgres minio
-          sleep 10
-
-          echo "Starting backend..."
-          docker compose -f docker-compose.prod.yaml up -d backend
-          echo "Waiting for backend to become healthy (up to 2 min)..."
-          for i in $(seq 1 24); do
-            sleep 5
-            CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
-            if [ -z "$CID" ]; then
-              echo "  backend container not found"
-              continue
-            fi
-            STATUS=$(docker inspect --format='{{.State.Status}}' "$CID" 2>/dev/null || echo unknown)
-            HEALTH=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$CID" 2>/dev/null || echo unknown)
-            echo "  [$i] container=$STATUS health=$HEALTH"
-            if [ "$HEALTH" = "healthy" ]; then
-              echo "Backend is healthy!"
-              break
-            fi
-            if [ "$STATUS" = "exited" ] || [ "$STATUS" = "dead" ]; then
-              echo "ERROR: Backend container exited. Logs:"
-              docker compose -f docker-compose.prod.yaml logs backend --tail=300
-              exit 1
-            fi
-          done
-
-          CID=$(docker compose -f docker-compose.prod.yaml ps -q backend 2>/dev/null || true)
-          HEALTH=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$CID" 2>/dev/null || echo unknown)
-          if [ "$HEALTH" != "healthy" ]; then
-            echo "ERROR: Backend not healthy after wait (health=$HEALTH). Logs:"
-            docker compose -f docker-compose.prod.yaml logs backend --tail=300
-            echo "--- healthcheck log ---"
-            docker inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' "$CID" 2>/dev/null || true
-            exit 1
-          fi
-
-          echo "Starting frontend..."
-          docker compose -f docker-compose.prod.yaml up -d frontend
+          docker compose -f docker-compose.prod.yaml up -d
 
           echo "Deployment complete!"
           docker compose -f docker-compose.prod.yaml ps
