@@ -76,14 +76,20 @@ class AuthServiceTest {
         getResponseSpec = mock(RestClient.ResponseSpec.class);
         lenient().when(googleRestClient.get()).thenReturn(getSpec);
         lenient().when(getSpec.retrieve()).thenReturn(getResponseSpec);
+
+        // Default valid-state mock reused by all authenticateWithGoogle tests
+        Claims mockStateClaims = mock(Claims.class);
+        lenient().when(jwtService.parseToken("valid-state")).thenReturn(mockStateClaims);
+        lenient().when(jwtService.isStateToken(mockStateClaims)).thenReturn(true);
     }
 
     // --- buildGoogleAuthorizeUrl ---
 
     @Test
     void testWhenBuildGoogleAuthorizeUrlThenReturnsUrlWithRequiredParams() {
-        when(googleProperties.getClientId()).thenReturn("test-client-id");
-        when(googleProperties.getRedirectUri()).thenReturn("http://localhost:4200/auth/callback");
+        when(googleProperties.clientId()).thenReturn("test-client-id");
+        when(googleProperties.redirectUri()).thenReturn("http://localhost:4200/auth/callback");
+        when(jwtService.generateStateToken()).thenReturn("state-token-xyz");
 
         String url = authService.buildGoogleAuthorizeUrl();
 
@@ -93,6 +99,7 @@ class AuthServiceTest {
         assertThat(url).contains("response_type=code");
         assertThat(url).contains("scope=openid%20email%20profile");
         assertThat(url).contains("prompt=select_account");
+        assertThat(url).contains("state=state-token-xyz");
     }
 
     // --- authenticateWithGoogle ---
@@ -116,10 +123,10 @@ class AuthServiceTest {
         when(jwtService.generateRefreshToken(testUser)).thenReturn("refresh-token");
         lenient().when(userService.toResponse(testUser)).thenReturn(null);
 
-        AuthResponse result = authService.authenticateWithGoogle("auth-code");
+        AuthResponse result = authService.authenticateWithGoogle("auth-code", "valid-state");
 
-        assertThat(result.getAccessToken()).isEqualTo("access-token");
-        assertThat(result.getRefreshToken()).isEqualTo("refresh-token");
+        assertThat(result.accessToken()).isEqualTo("access-token");
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
     }
 
     @Test
@@ -127,7 +134,7 @@ class AuthServiceTest {
     void testGivenNullTokenResponseWhenAuthenticateThenThrowInvalidTokenException() {
         when(postResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(null);
 
-        assertThatThrownBy(() -> authService.authenticateWithGoogle("bad-code"))
+        assertThatThrownBy(() -> authService.authenticateWithGoogle("bad-code", "valid-state"))
                 .isInstanceOf(InvalidTokenException.class)
                 .hasMessageContaining("Failed to exchange authorization code with Google");
     }
@@ -138,9 +145,18 @@ class AuthServiceTest {
         when(postResponseSpec.body(any(ParameterizedTypeReference.class)))
                 .thenReturn(Map.of("error", "invalid_grant"));
 
-        assertThatThrownBy(() -> authService.authenticateWithGoogle("expired-code"))
+        assertThatThrownBy(() -> authService.authenticateWithGoogle("expired-code", "valid-state"))
                 .isInstanceOf(InvalidTokenException.class)
                 .hasMessageContaining("Failed to exchange authorization code with Google");
+    }
+
+    @Test
+    void testGivenInvalidStateWhenAuthenticateThenThrowInvalidTokenException() {
+        when(jwtService.parseToken("bad-state")).thenReturn(null);
+
+        assertThatThrownBy(() -> authService.authenticateWithGoogle("any-code", "bad-state"))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Invalid or expired OAuth state");
     }
 
     // --- refreshAuth ---
@@ -154,6 +170,7 @@ class AuthServiceTest {
         when(jwtService.extractUserId(mockClaims)).thenReturn(TEST_USER_ID);
         when(userService.findById(TEST_USER_ID)).thenReturn(testUser);
         when(jwtService.generateAccessToken(testUser)).thenReturn("new-access-token");
+        when(jwtService.generateRefreshToken(testUser)).thenReturn("new-refresh-token");
         when(userService.toResponse(testUser)).thenReturn(
                 new com.app.backend.dto.response.UserResponse(
                         TEST_USER_ID, "test@example.com", "Test User", null,
@@ -161,10 +178,10 @@ class AuthServiceTest {
 
         AuthResponse result = authService.refreshAuth("valid-refresh-token");
 
-        assertThat(result.getAccessToken()).isEqualTo("new-access-token");
-        assertThat(result.getUser()).isNotNull();
-        assertThat(result.getUser().getEmail()).isEqualTo("test@example.com");
-        assertThat(result.getRefreshToken()).isNull();
+        assertThat(result.accessToken()).isEqualTo("new-access-token");
+        assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
+        assertThat(result.user()).isNotNull();
+        assertThat(result.user().email()).isEqualTo("test@example.com");
     }
 
     @Test

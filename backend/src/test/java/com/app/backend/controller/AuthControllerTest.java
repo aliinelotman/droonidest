@@ -74,12 +74,12 @@ class AuthControllerTest {
                 UUID.randomUUID(), "test@example.com", "Test User", null, UserRole.USER);
         AuthResponse authResponse = new AuthResponse("access-token-123", userResponse, "refresh-token-456");
 
-        when(authService.authenticateWithGoogle("valid-code")).thenReturn(authResponse);
+        when(authService.authenticateWithGoogle("valid-code", "valid-state")).thenReturn(authResponse);
         when(authService.getRefreshTokenMaxAgeSeconds()).thenReturn(604_800L);
 
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"code\": \"valid-code\"}"))
+                        .content("{\"code\": \"valid-code\", \"state\": \"valid-state\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token-123"))
                 .andExpect(jsonPath("$.user.email").value("test@example.com"))
@@ -91,7 +91,15 @@ class AuthControllerTest {
     void testGivenBlankCodeWhenGoogleAuthThenReturnBadRequest() throws Exception {
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"code\": \"\"}"))
+                        .content("{\"code\": \"\", \"state\": \"valid-state\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGivenBlankStateWhenGoogleAuthThenReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/google")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\": \"valid-code\", \"state\": \"\"}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -104,18 +112,20 @@ class AuthControllerTest {
     }
 
     @Test
-    void testGivenValidCookieWhenRefreshThenReturnAccessTokenAndUser() throws Exception {
+    void testGivenValidCookieWhenRefreshThenReturnAccessTokenSetNewCookie() throws Exception {
         UserResponse userResponse = new UserResponse(
                 UUID.randomUUID(), "test@example.com", "Test User", null, UserRole.USER);
-        AuthResponse authResponse = new AuthResponse("new-access-token", userResponse, null);
+        AuthResponse authResponse = new AuthResponse("new-access-token", userResponse, "new-refresh-token");
 
         when(authService.refreshAuth("valid-refresh-token")).thenReturn(authResponse);
+        when(authService.getRefreshTokenMaxAgeSeconds()).thenReturn(604_800L);
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                         .cookie(new Cookie("refresh_token", "valid-refresh-token")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("new-access-token"))
-                .andExpect(jsonPath("$.user.email").value("test@example.com"));
+                .andExpect(jsonPath("$.user.email").value("test@example.com"))
+                .andExpect(header().exists("Set-Cookie"));
     }
 
     @Test
