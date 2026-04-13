@@ -33,6 +33,7 @@ describe('authInterceptor', () => {
 
     const req = httpMock.expectOne('/api/test');
     expect(req.request.headers.get('Authorization')).toBe('Bearer my-token');
+    expect(req.request.withCredentials).toBeTrue();
     req.flush({});
   });
 
@@ -43,6 +44,7 @@ describe('authInterceptor', () => {
 
     const req = httpMock.expectOne('/api/test');
     expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.withCredentials).toBeTrue();
     req.flush({});
   });
 
