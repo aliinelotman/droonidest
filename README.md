@@ -47,7 +47,7 @@ Also register `http://localhost:4200/auth/callback` as an authorized redirect UR
 ### 2. Start with Docker
 
 ```bash
-docker compose up --build -d
+docker compose up --build --watch
 ```
 
 | Service   | URL                                    |
