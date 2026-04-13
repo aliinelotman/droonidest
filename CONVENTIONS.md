@@ -24,7 +24,7 @@
 
 ## Testing
 
-<!-- TODO: Testing strategy will be documented here once finalized. -->
+- Testing strategy: [TESTING_STRATEGY.md](TESTING_STRATEGY.md)
 
 ## API Conventions
 
