@@ -22,7 +22,7 @@ export interface ModuleLink {
 export class SectionNavComponent implements AfterViewInit {
   @Input() sections: NavSection[] = [];
   @Input() moduleLinks: ModuleLink[] = [];
-  activeId: string = '';
+  activeId = '';
   sidebarOpen = false;
   scrollPercent = 0;
   exploding = false;

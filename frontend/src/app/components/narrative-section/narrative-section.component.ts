@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
 export class NarrativeSectionComponent {
   @Input({ required: true }) heading!: string;
   @Input({ required: true }) body!: string;
-  @Input() imageUrl: string = '';
-  @Input() imageAlt: string = 'Illustration';
-  @Input() reverse: boolean = false;
+  @Input() imageUrl = '';
+  @Input() imageAlt = 'Illustration';
+  @Input() reverse = false;
 }

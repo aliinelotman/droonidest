@@ -67,7 +67,7 @@ export class QuizComponent implements OnInit {
 
   ngOnInit(): void {
     this.http
-      .get<QuizQuestion[]>('/api/quiz/drones')
+      .get<QuizQuestion[]>('/api/v1/quiz/drones')
       .pipe(catchError(() => of(this.fallbackQuestions)))
       .subscribe((questions) => {
         this.questions = questions;

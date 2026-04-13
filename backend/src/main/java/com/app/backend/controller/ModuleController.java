@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/modules")
+@RequestMapping("/api/v1/modules")
 @RequiredArgsConstructor
 @Tag(name = "Modules", description = "Course module and lesson browsing (public)")
 public class ModuleController {
