@@ -5,6 +5,9 @@ import { firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+const API_BASE = `${environment.apiUrl}/api/v1`;
+const AUTH_API = `${API_BASE}/auth`;
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -26,7 +29,6 @@ export interface LoginOptions {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly apiUrl = environment.apiUrl;
 
   private accessToken: string | null = null;
   private isLoggingOut = false;
@@ -41,7 +43,7 @@ export class AuthService {
   async initAuth(): Promise<void> {
     try {
       const result = await firstValueFrom(
-        this.http.post<AuthTokenResponse>(`${this.apiUrl}/api/v1/auth/refresh`, {})
+        this.http.post<AuthTokenResponse>(`${AUTH_API}/refresh`, {})
       );
       this.accessToken = result.accessToken;
       this.currentUserSignal.set(result.user);
@@ -91,7 +93,7 @@ export class AuthService {
 
     window.addEventListener('message', handler);
 
-    this.http.get<{ url: string }>(`${this.apiUrl}/api/v1/auth/google/authorize-url`)
+    this.http.get<{ url: string }>(`${AUTH_API}/google/authorize-url`)
       .pipe(take(1))
       .subscribe({
         next: ({ url }) => {
@@ -123,7 +125,7 @@ export class AuthService {
     // Reload to '/' after clearing the refresh cookie on the server. This gives
     // us a clean slate regardless of which page the user was on and avoids
     // having to track stale state across components.
-    this.http.post(`${this.apiUrl}/api/v1/auth/logout`, {})
+    this.http.post(`${AUTH_API}/logout`, {})
       .pipe(take(1))
       .subscribe({
         next: () => this.reloadToRoot(),
@@ -138,7 +140,7 @@ export class AuthService {
   }
 
   private exchangeCode(code: string, state: string, redirectTo?: string): void {
-    this.http.post<AuthTokenResponse>(`${this.apiUrl}/api/v1/auth/google`, { code, state })
+    this.http.post<AuthTokenResponse>(`${AUTH_API}/google`, { code, state })
       .pipe(take(1))
       .subscribe({
         next: ({ accessToken, user }) => {
