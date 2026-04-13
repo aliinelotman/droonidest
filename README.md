@@ -20,7 +20,7 @@ Monorepo with an Angular frontend and a Java Spring Boot backend.
 | Node.js       | >= 22    |
 | npm           | >= 11    |
 | Java          | 21 LTS   |
-| Gradle        | >= 8     |
+| Maven         | >= 3.9   |
 
 ## Getting Started
 
