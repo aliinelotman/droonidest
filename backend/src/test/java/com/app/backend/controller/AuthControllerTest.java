@@ -129,9 +129,9 @@ class AuthControllerTest {
     }
 
     @Test
-    void testGivenNoCookieWhenRefreshThenReturnUnauthorized() throws Exception {
+    void testGivenNoCookieWhenRefreshThenReturnNoContent() throws Exception {
         mockMvc.perform(post("/api/v1/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNoContent());
     }
 
     @Test

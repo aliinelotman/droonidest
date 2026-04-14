@@ -95,19 +95,23 @@ public class AuthController {
      */
     @Operation(
             summary = "Refresh access token",
-            description = "Issues a new access token using the refresh token from the httpOnly cookie.",
+            description = "Issues a new access token using the refresh token from the httpOnly cookie. " +
+                    "Returns 204 when no cookie is present (user not logged in) and 401 when the token is invalid or expired.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "New access token issued"),
-                    @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token", content = @Content)
+                    @ApiResponse(responseCode = "204", description = "No refresh token cookie present", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token", content = @Content)
             }
     )
     @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = extractRefreshTokenFromCookies(request)
-                .orElseThrow(() -> new InvalidTokenException("Refresh token cookie not found"));
+        Optional<String> refreshToken = extractRefreshTokenFromCookies(request);
+        if (refreshToken.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
 
-        AuthResponse authResponse = authService.refreshAuth(refreshToken);
+        AuthResponse authResponse = authService.refreshAuth(refreshToken.get());
         setRefreshTokenCookie(response, authResponse.refreshToken());
         return ResponseEntity.ok(authResponse);
     }

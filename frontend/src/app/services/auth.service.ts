@@ -5,9 +5,6 @@ import { firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-const API_BASE = `${environment.apiUrl}/api/v1`;
-const AUTH_API = `${API_BASE}/auth`;
-
 export interface UserResponse {
   id: string;
   email: string;
@@ -43,12 +40,15 @@ export class AuthService {
   async initAuth(): Promise<void> {
     try {
       const result = await firstValueFrom(
-        this.http.post<AuthTokenResponse>(`${AUTH_API}/refresh`, {})
+        this.http.post<AuthTokenResponse>(`${environment.authApi}/refresh`, {}, { observe: 'response' })
       );
-      this.accessToken = result.accessToken;
-      this.currentUserSignal.set(result.user);
+      if (result.status === 200 && result.body) {
+        this.accessToken = result.body.accessToken;
+        this.currentUserSignal.set(result.body.user);
+      }
+      // 204 = no refresh token cookie → user stays unauthenticated
     } catch {
-      // No valid refresh token — user stays unauthenticated
+      // Invalid/expired token or network error — user stays unauthenticated
     }
   }
 
@@ -93,7 +93,7 @@ export class AuthService {
 
     window.addEventListener('message', handler);
 
-    this.http.get<{ url: string }>(`${AUTH_API}/google/authorize-url`)
+    this.http.get<{ url: string }>(`${environment.authApi}/google/authorize-url`)
       .pipe(take(1))
       .subscribe({
         next: ({ url }) => {
@@ -125,7 +125,7 @@ export class AuthService {
     // Reload to '/' after clearing the refresh cookie on the server. This gives
     // us a clean slate regardless of which page the user was on and avoids
     // having to track stale state across components.
-    this.http.post(`${AUTH_API}/logout`, {})
+    this.http.post(`${environment.authApi}/logout`, {})
       .pipe(take(1))
       .subscribe({
         next: () => this.reloadToRoot(),
@@ -140,7 +140,7 @@ export class AuthService {
   }
 
   private exchangeCode(code: string, state: string, redirectTo?: string): void {
-    this.http.post<AuthTokenResponse>(`${AUTH_API}/google`, { code, state })
+    this.http.post<AuthTokenResponse>(`${environment.authApi}/google`, { code, state })
       .pipe(take(1))
       .subscribe({
         next: ({ accessToken, user }) => {

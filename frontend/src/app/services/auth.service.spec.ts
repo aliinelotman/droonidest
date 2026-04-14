@@ -2,6 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { AuthService, UserResponse } from './auth.service';
+import { environment } from '../../environments/environment';
+
+const REFRESH_URL = `${environment.authApi}/refresh`;
+const AUTHORIZE_URL = `${environment.authApi}/google/authorize-url`;
+const GOOGLE_AUTH_URL = `${environment.authApi}/google`;
+const LOGOUT_URL = `${environment.authApi}/logout`;
 
 const mockUser: UserResponse = {
   id: '11111111-1111-1111-1111-111111111111',
@@ -33,7 +39,7 @@ describe('AuthService', () => {
     it('should set currentUser and accessToken on successful refresh', async () => {
       const promise = service.initAuth();
 
-      const req = httpMock.expectOne('http://localhost:8080/api/v1/auth/refresh');
+      const req = httpMock.expectOne(REFRESH_URL);
       expect(req.request.method).toBe('POST');
       req.flush({ accessToken: 'token123', user: mockUser });
 
@@ -43,10 +49,22 @@ describe('AuthService', () => {
       expect(service.getAccessToken()).toBe('token123');
     });
 
+    it('should leave currentUser null when server returns 204 (no cookie)', async () => {
+      const promise = service.initAuth();
+
+      httpMock.expectOne(REFRESH_URL)
+        .flush(null, { status: 204, statusText: 'No Content' });
+
+      await promise;
+
+      expect(service.currentUser()).toBeNull();
+      expect(service.getAccessToken()).toBeNull();
+    });
+
     it('should leave currentUser null when refresh fails', async () => {
       const promise = service.initAuth();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/refresh')
+      httpMock.expectOne(REFRESH_URL)
         .flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
       await promise;
@@ -75,7 +93,7 @@ describe('AuthService', () => {
         jasmine.stringContaining('popup')
       );
       // Drain the authorize-url request so afterEach's httpMock.verify() passes.
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/google/authorize-url')
+      httpMock.expectOne(AUTHORIZE_URL)
         .flush({ url: 'https://accounts.google.com/o/oauth2/v2/auth?client_id=abc' });
     });
 
@@ -85,7 +103,7 @@ describe('AuthService', () => {
 
       service.loginWithGoogle();
 
-      const req = httpMock.expectOne('http://localhost:8080/api/v1/auth/google/authorize-url');
+      const req = httpMock.expectOne(AUTHORIZE_URL);
       expect(req.request.method).toBe('GET');
       req.flush({ url: 'https://accounts.google.com/o/oauth2/v2/auth?client_id=abc' });
 
@@ -98,7 +116,7 @@ describe('AuthService', () => {
 
       service.loginWithGoogle();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/google/authorize-url')
+      httpMock.expectOne(AUTHORIZE_URL)
         .flush('Server error', { status: 500, statusText: 'Server Error' });
 
       expect(popup.close).toHaveBeenCalled();
@@ -109,7 +127,7 @@ describe('AuthService', () => {
 
       expect(() => service.loginWithGoogle()).not.toThrow();
       // No authorize-url call is made when the popup is blocked.
-      httpMock.expectNone('http://localhost:8080/api/v1/auth/google/authorize-url');
+      httpMock.expectNone(AUTHORIZE_URL);
     });
 
     it('should exchange code and set currentUser after postMessage', async () => {
@@ -123,7 +141,7 @@ describe('AuthService', () => {
 
       service.loginWithGoogle();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/google/authorize-url')
+      httpMock.expectOne(AUTHORIZE_URL)
         .flush({ url: 'https://accounts.google.com/o/oauth2/v2/auth?client_id=abc' });
 
       expect(capturedHandler).toBeDefined();
@@ -133,7 +151,7 @@ describe('AuthService', () => {
         origin: window.location.origin,
       }));
 
-      const req = httpMock.expectOne('http://localhost:8080/api/v1/auth/google');
+      const req = httpMock.expectOne(GOOGLE_AUTH_URL);
       expect(req.request.body).toEqual({ code: 'oauth-code-abc', state: 'state-token-xyz' });
       req.flush({ accessToken: 'new-token', user: mockUser });
 
@@ -154,7 +172,7 @@ describe('AuthService', () => {
 
       service.loginWithGoogle();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/google/authorize-url')
+      httpMock.expectOne(AUTHORIZE_URL)
         .flush({ url: 'https://accounts.google.com/o/oauth2/v2/auth?client_id=abc' });
 
       capturedHandler!(new MessageEvent('message', {
@@ -162,7 +180,7 @@ describe('AuthService', () => {
         origin: 'https://evil.com',
       }));
 
-      httpMock.expectNone('http://localhost:8080/api/v1/auth/google');
+      httpMock.expectNone(GOOGLE_AUTH_URL);
     });
   });
 
@@ -181,20 +199,20 @@ describe('AuthService', () => {
 
       expect(service.currentUser()).toBeNull();
       expect(service.getAccessToken()).toBeNull();
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/logout');
+      httpMock.expectOne(LOGOUT_URL);
     });
 
     it('should call logout endpoint', () => {
       service.logout();
 
-      const req = httpMock.expectOne('http://localhost:8080/api/v1/auth/logout');
+      const req = httpMock.expectOne(LOGOUT_URL);
       expect(req.request.method).toBe('POST');
     });
 
     it('should reload to "/" after the server clears the refresh cookie', () => {
       service.logout();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/logout').flush(null);
+      httpMock.expectOne(LOGOUT_URL).flush(null);
 
       expect(reloadSpy).toHaveBeenCalled();
     });
@@ -202,7 +220,7 @@ describe('AuthService', () => {
     it('should still reload to "/" if the logout request fails', () => {
       service.logout();
 
-      httpMock.expectOne('http://localhost:8080/api/v1/auth/logout')
+      httpMock.expectOne(LOGOUT_URL)
         .flush('Server error', { status: 500, statusText: 'Server Error' });
 
       expect(reloadSpy).toHaveBeenCalled();
