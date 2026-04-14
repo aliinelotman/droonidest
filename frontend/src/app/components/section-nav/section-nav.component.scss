@@ -307,16 +307,8 @@ $progress-height: 2px;
     opacity: 0;
     visibility: hidden;
     transform: translateY(30px);
-    transition: opacity 250ms linear, visibility 250ms linear, transform 250ms linear;
-
-    &:nth-child(1) { transition-delay: 200ms; }
-    &:nth-child(2) { transition-delay: 150ms; }
-    &:nth-child(3) { transition-delay: 100ms; }
-    &:nth-child(4) { transition-delay:  50ms; }
-    &:nth-child(5) { transition-delay:  25ms; }
-    &:nth-child(6) { transition-delay:  10ms; }
-    &:nth-child(7) { transition-delay:   0ms; }
-    &:nth-child(8) { transition-delay:   0ms; }
+    transition: all 250ms linear;
+    transition-delay: max(0ms, calc(200ms - var(--i, 0) * 50ms));
   }
 
   // Module links slightly smaller
@@ -378,14 +370,6 @@ $progress-height: 2px;
     opacity: 1;
     transform: translateY(0);
     transition: opacity 350ms ease, transform 250ms ease;
-
-    &:nth-child(1) { transition-delay: 1400ms; }
-    &:nth-child(2) { transition-delay: 1480ms; }
-    &:nth-child(3) { transition-delay: 1560ms; }
-    &:nth-child(4) { transition-delay: 1640ms; }
-    &:nth-child(5) { transition-delay: 1720ms; }
-    &:nth-child(6) { transition-delay: 1800ms; }
-    &:nth-child(7) { transition-delay: 1880ms; }
-    &:nth-child(8) { transition-delay: 1960ms; }
+    transition-delay: calc(1400ms + var(--i, 0) * 80ms);
   }
 }

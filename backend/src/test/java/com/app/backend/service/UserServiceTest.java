@@ -96,10 +96,10 @@ class UserServiceTest {
 
         UserResponse response = userService.toResponse(user);
 
-        assertThat(response.getId()).isEqualTo(userId);
-        assertThat(response.getEmail()).isEqualTo("test@example.com");
-        assertThat(response.getDisplayName()).isEqualTo("Test User");
-        assertThat(response.getRole()).isEqualTo(UserRole.USER);
+        assertThat(response.id()).isEqualTo(userId);
+        assertThat(response.email()).isEqualTo("test@example.com");
+        assertThat(response.displayName()).isEqualTo("Test User");
+        assertThat(response.role()).isEqualTo(UserRole.USER);
     }
 
     @Test
