@@ -18,7 +18,7 @@
     <span class="module-card__badge">Available Soon</span>
   }
   @if (locked) {
-    <button class="module-card__badge module-card__badge--locked" (click)="loginRequested.emit()">
+    <button class="module-card__badge module-card__badge--locked" (click)="$event.stopPropagation(); loginRequested.emit()">
       &#128274; Login required
     </button>
   }
