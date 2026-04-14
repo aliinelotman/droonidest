@@ -27,13 +27,11 @@ Stories explicitly marked in `PRODUCT.md` as not part of the current MVP, especi
 
 - Unit tests: service logic, JWT logic, mapping logic, validation rules.
 - Slice/integration tests: controller tests, repository tests, security/filter behavior, Flyway-backed persistence behavior.
-- End-to-end API smoke tests: a thin set covering the main user journey.
 
 ### Frontend
 
 - Unit tests: standalone components, view-model logic, formatting, fallbacks, status rendering.
 - Integration tests: page + service + router behavior with mocked HTTP responses.
-- End-to-end browser smoke tests: a thin set for the main user stories once e2e tooling is added.
 
 ## Story-Based Coverage
 
@@ -60,7 +58,6 @@ Recommended tests:
 - Backend unit: `AuthService`, JWT service, token validation edge cases.
 - Backend controller: success, invalid token, inactive user, malformed request.
 - Frontend component/service: auth state rendering, initials fallback, logout flow.
-- E2E smoke: login -> header shows identity -> logout -> public home view.
 
 ### 2. Module Catalogue
 
@@ -85,7 +82,6 @@ Recommended tests:
 - Backend controller: correct response shape for catalogue endpoints.
 - Frontend component: module card rendering with and without thumbnail.
 - Frontend integration: menu uses API data and preserves ordering.
-- Browser smoke: open menu, navigate catalogue, see cards after module end.
 
 ### 3. Lessons
 
@@ -110,7 +106,6 @@ Recommended tests:
 - Backend service/repository: lesson visibility and ordering.
 - Backend controller: module lesson list and lesson detail responses.
 - Frontend page/component: ordered lesson navigation, markdown rendering, conditional video rendering.
-- Browser smoke: open a module, open a lesson, verify content and optional video behavior.
 
 ### 4. Progress Tracking
 
@@ -135,7 +130,6 @@ Recommended tests:
 - Backend integration: persistence of `user_lesson_progress` records.
 - Frontend component: progress bar width/value and status icon mapping.
 - Frontend integration: API response updates page state correctly.
-- Browser smoke: resume user session and confirm stored progress is visible.
 
 ## Non-MVP Future Coverage
 
@@ -221,21 +215,10 @@ Frontend tests should cover:
 - Assert visible states from the user stories: ordering, fallbacks, conditional sections, and progress states.
 - Keep CSS assertions limited to behavior-critical states such as sticky header presence and status-state classes.
 
-## End-to-End Smoke Tests
-
-Once e2e tooling is introduced, keep the suite small and stable. The first smoke flows should be:
-
-1. User logs in, sees profile name/avatar or initials, and logs out.
-2. User opens module navigation and sees only published modules in the expected order.
-3. User opens a module and sees lessons in the expected order.
-4. User opens a lesson and sees content plus optional video behavior.
-5. User returns and sees saved progress/state indicators.
-
 ## CI Expectations
 
 - Backend unit and integration tests run on every pull request.
 - Frontend unit and integration tests run on every pull request.
-- Smoke e2e tests run at least on merges to `develop`; later they can also run on pull requests if build time stays acceptable.
 - New story implementations should add or update tests in the same branch.
 
 ## Coverage Priorities
