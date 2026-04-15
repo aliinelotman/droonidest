@@ -20,7 +20,7 @@ Monorepo with an Angular frontend and a Java Spring Boot backend.
 | Node.js       | >= 22    |
 | npm           | >= 11    |
 | Java          | 21 LTS   |
-| Gradle        | >= 8     |
+| Maven         | >= 3.9   |
 
 ## Getting Started
 
@@ -47,15 +47,15 @@ Also register `http://localhost:4200/auth/callback` as an authorized redirect UR
 ### 2. Start with Docker
 
 ```bash
-docker compose up --build -d
+docker compose up --build --watch
 ```
 
-| Service   | URL                                    |
-|-----------|----------------------------------------|
-| Frontend  | http://localhost:4200                  |
-| Backend   | http://localhost:8080                  |
-| Swagger   | http://localhost:8080/swagger-ui.html  |
-| MinIO     | http://localhost:9001                  |
+| Service   | URL                                           |
+|-----------|-----------------------------------------------|
+| Frontend  | http://localhost:4200                         |
+| Backend   | http://localhost:8080                         |
+| Swagger   | http://localhost:8080/swagger-ui/index.html   |
+| MinIO     | http://localhost:9001                         |
 
 ## Documentation
 
