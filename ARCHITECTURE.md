@@ -136,18 +136,16 @@ backend/src/main/java/com/app/backend/
 
 ## Frontend Structure
 
-Angular SPA with lazy-loaded feature modules:
+Angular SPA with standalone components and lazy-loaded routes:
 
 ```
 frontend/src/app/
-├── core/              # Singleton services, interceptors, guards
-├── shared/            # Reusable components, pipes, directives
-├── features/
-│   ├── public-course/ # Module 1 (public), voiceover player, SVG animations
-│   ├── auth/          # Login flow, Google OAuth callback
-│   ├── dashboard/     # User dashboard, progress overview
-│   └── admin/         # Content editor, module management
-└── app.routes.ts      # Top-level routing with lazy loading
+├── components/        # Reusable UI components (hero-section, quiz, gallery, etc.)
+├── pages/             # Routed page components (module-one, module-two, auth-callback)
+├── services/          # Singleton services (AuthService)
+├── guards/            # Route guards (authGuard)
+├── interceptors/      # HTTP interceptors (authInterceptor)
+└── app.routes.ts      # Top-level routing with lazy loadComponent
 ```
 
 ## API Design

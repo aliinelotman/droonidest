@@ -9,5 +9,5 @@ import { Component, Input } from '@angular/core';
 export class InfoCardComponent {
   @Input({ required: true }) title!: string;
   @Input({ required: true }) body!: string;
-  @Input() accentColor: string = 'var(--color-accent)';
+  @Input() accentColor = 'var(--color-accent)';
 }
