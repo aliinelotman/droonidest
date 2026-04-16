@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface ModuleRepository extends JpaRepository<Module, UUID> {
 
     List<Module> findAllByStatusOrderBySortOrder(ContentStatus status);
+
+    List<Module> findAllByOrderBySortOrder();
 }

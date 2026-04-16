@@ -1,5 +1,7 @@
 package com.app.backend;
 
+import com.app.backend.model.Lesson;
+import com.app.backend.model.Module;
 import com.app.backend.model.User;
 
 import java.lang.reflect.Field;
@@ -13,26 +15,35 @@ public final class TestEntityFactory {
     private TestEntityFactory() {
     }
 
-    /**
-     * Creates a test User with the given ID set via reflection
-     * (since the ID is auto-generated and has no setter).
-     */
     public static User createUser(UUID id, String googleId, String email, String displayName) {
         User user = new User(googleId, email, displayName);
-        setId(user, id);
+        setId(user, "id", User.class, id);
         return user;
     }
 
-    /**
-     * Sets the {@code id} field on a User entity via reflection.
-     */
+    public static Module createModule(UUID id, String title, int sortOrder) {
+        Module module = new Module(title, sortOrder);
+        setId(module, "id", Module.class, id);
+        return module;
+    }
+
+    public static Lesson createLesson(UUID id, String title) {
+        Lesson lesson = new Lesson(title);
+        setId(lesson, "id", Lesson.class, id);
+        return lesson;
+    }
+
     public static void setId(User user, UUID id) {
+        setId(user, "id", User.class, id);
+    }
+
+    private static void setId(Object entity, String fieldName, Class<?> clazz, UUID id) {
         try {
-            Field field = User.class.getDeclaredField("id");
+            Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
-            field.set(user, id);
+            field.set(entity, id);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to set user ID for test", e);
+            throw new RuntimeException("Failed to set " + fieldName + " for test", e);
         }
     }
 }
