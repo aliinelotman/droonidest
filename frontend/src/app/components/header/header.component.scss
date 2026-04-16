@@ -1,0 +1,70 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+  &__logo a {
+    font-weight: 700;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &__nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  &__nav-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__lock-icon {
+    font-size: 0.75rem;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__burger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  &__btn {
+    padding: 0.375rem 1rem;
+    border-radius: 4px;
+    border: 1px solid currentColor;
+    cursor: pointer;
+    background: transparent;
+
+    &--login {
+      color: #1a73e8;
+    }
+
+    &--logout {
+      color: #666;
+    }
+  }
+
+  &__username {
+    font-size: 0.875rem;
+    color: #444;
+  }
+}

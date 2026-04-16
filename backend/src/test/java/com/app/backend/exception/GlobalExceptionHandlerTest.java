@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().get("error")).isEqualTo("UNAUTHORIZED");
-        assertThat(response.getBody().get("message")).isEqualTo("Token expired");
+        assertThat(response.getBody().get("message")).isEqualTo("Authentication failed");
     }
 
     @Test

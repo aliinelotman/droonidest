@@ -15,9 +15,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,27 @@ public class AuthController {
     private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
 
     private final AuthService authService;
+
+    @Value("${auth.cookie.secure:true}")
+    private boolean secureCookie;
+
+    /**
+     * Returns the Google OAuth 2.0 authorization URL the frontend should open to
+     * initiate login. Keeps the Google client ID on the backend.
+     */
+    @Operation(
+            summary = "Get Google OAuth authorize URL",
+            description = "Returns the Google OAuth 2.0 authorization URL the frontend should open " +
+                    "to initiate login.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Authorize URL returned")
+            }
+    )
+    @SecurityRequirements
+    @GetMapping("/google/authorize-url")
+    public ResponseEntity<Map<String, String>> getGoogleAuthorizeUrl() {
+        return ResponseEntity.ok(Map.of("url", authService.buildGoogleAuthorizeUrl()));
+    }
 
     /**
      * Exchanges a Google authorization code for JWT tokens.
@@ -62,8 +85,8 @@ public class AuthController {
             @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response) {
 
-        AuthResponse authResponse = authService.authenticateWithGoogle(request.getCode());
-        setRefreshTokenCookie(response, authResponse.getRefreshToken());
+        AuthResponse authResponse = authService.authenticateWithGoogle(request.code(), request.state());
+        setRefreshTokenCookie(response, authResponse.refreshToken());
         return ResponseEntity.ok(authResponse);
     }
 
@@ -72,20 +95,25 @@ public class AuthController {
      */
     @Operation(
             summary = "Refresh access token",
-            description = "Issues a new access token using the refresh token from the httpOnly cookie.",
+            description = "Issues a new access token using the refresh token from the httpOnly cookie. " +
+                    "Returns 204 when no cookie is present (user not logged in) and 401 when the token is invalid or expired.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "New access token issued"),
-                    @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token", content = @Content)
+                    @ApiResponse(responseCode = "204", description = "No refresh token cookie present", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token", content = @Content)
             }
     )
     @SecurityRequirements
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request) {
-        String refreshToken = extractRefreshTokenFromCookies(request)
-                .orElseThrow(() -> new InvalidTokenException("Refresh token cookie not found"));
+    public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Optional<String> refreshToken = extractRefreshTokenFromCookies(request);
+        if (refreshToken.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
 
-        String newAccessToken = authService.refreshAccessToken(refreshToken);
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        AuthResponse authResponse = authService.refreshAuth(refreshToken.get());
+        setRefreshTokenCookie(response, authResponse.refreshToken());
+        return ResponseEntity.ok(authResponse);
     }
 
     /**
@@ -108,7 +136,7 @@ public class AuthController {
     private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
                 .httpOnly(true)
-                .secure(true)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/api/v1/auth")
                 .maxAge(authService.getRefreshTokenMaxAgeSeconds())
@@ -119,7 +147,7 @@ public class AuthController {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/api/v1/auth")
                 .maxAge(0)

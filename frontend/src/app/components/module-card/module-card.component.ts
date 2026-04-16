@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -13,4 +13,14 @@ export class ModuleCardComponent {
   @Input({ required: true }) intro!: string;
   @Input() link: string | null = null;
   @Input() disabled = false;
+  @Input() locked = false;
+
+  @Output() loginRequested = new EventEmitter<void>();
+
+  onCardClick(event: Event): void {
+    if (this.locked) {
+      event.preventDefault();
+      this.loginRequested.emit();
+    }
+  }
 }

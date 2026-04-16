@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -58,17 +59,27 @@ class AuthControllerTest {
     }
 
     @Test
+    void testWhenGetAuthorizeUrlThenReturnUrl() throws Exception {
+        when(authService.buildGoogleAuthorizeUrl())
+                .thenReturn("https://accounts.google.com/o/oauth2/v2/auth?client_id=abc");
+
+        mockMvc.perform(get("/api/v1/auth/google/authorize-url"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value("https://accounts.google.com/o/oauth2/v2/auth?client_id=abc"));
+    }
+
+    @Test
     void testGivenValidCodeWhenGoogleAuthThenReturnTokenAndSetCookie() throws Exception {
         UserResponse userResponse = new UserResponse(
                 UUID.randomUUID(), "test@example.com", "Test User", null, UserRole.USER);
         AuthResponse authResponse = new AuthResponse("access-token-123", userResponse, "refresh-token-456");
 
-        when(authService.authenticateWithGoogle("valid-code")).thenReturn(authResponse);
+        when(authService.authenticateWithGoogle("valid-code", "valid-state")).thenReturn(authResponse);
         when(authService.getRefreshTokenMaxAgeSeconds()).thenReturn(604_800L);
 
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"code\": \"valid-code\"}"))
+                        .content("{\"code\": \"valid-code\", \"state\": \"valid-state\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token-123"))
                 .andExpect(jsonPath("$.user.email").value("test@example.com"))
@@ -80,7 +91,15 @@ class AuthControllerTest {
     void testGivenBlankCodeWhenGoogleAuthThenReturnBadRequest() throws Exception {
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"code\": \"\"}"))
+                        .content("{\"code\": \"\", \"state\": \"valid-state\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGivenBlankStateWhenGoogleAuthThenReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/google")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\": \"valid-code\", \"state\": \"\"}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -93,24 +112,31 @@ class AuthControllerTest {
     }
 
     @Test
-    void testGivenValidCookieWhenRefreshThenReturnNewAccessToken() throws Exception {
-        when(authService.refreshAccessToken("valid-refresh-token")).thenReturn("new-access-token");
+    void testGivenValidCookieWhenRefreshThenReturnAccessTokenSetNewCookie() throws Exception {
+        UserResponse userResponse = new UserResponse(
+                UUID.randomUUID(), "test@example.com", "Test User", null, UserRole.USER);
+        AuthResponse authResponse = new AuthResponse("new-access-token", userResponse, "new-refresh-token");
+
+        when(authService.refreshAuth("valid-refresh-token")).thenReturn(authResponse);
+        when(authService.getRefreshTokenMaxAgeSeconds()).thenReturn(604_800L);
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                         .cookie(new Cookie("refresh_token", "valid-refresh-token")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("new-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.user.email").value("test@example.com"))
+                .andExpect(header().exists("Set-Cookie"));
     }
 
     @Test
-    void testGivenNoCookieWhenRefreshThenReturnUnauthorized() throws Exception {
+    void testGivenNoCookieWhenRefreshThenReturnNoContent() throws Exception {
         mockMvc.perform(post("/api/v1/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     void testGivenInvalidTokenWhenRefreshThenReturnUnauthorized() throws Exception {
-        when(authService.refreshAccessToken("bad-token"))
+        when(authService.refreshAuth("bad-token"))
                 .thenThrow(new InvalidTokenException("Invalid or expired refresh token"));
 
         mockMvc.perform(post("/api/v1/auth/refresh")

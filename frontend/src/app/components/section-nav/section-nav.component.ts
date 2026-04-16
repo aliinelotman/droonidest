@@ -1,5 +1,6 @@
-import { Component, HostListener, Input, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Input, AfterViewInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 export interface NavSection {
   id: string;
@@ -20,9 +21,11 @@ export interface ModuleLink {
   styleUrl: './section-nav.component.scss',
 })
 export class SectionNavComponent implements AfterViewInit {
+  private readonly authService = inject(AuthService);
+
   @Input() sections: NavSection[] = [];
   @Input() moduleLinks: ModuleLink[] = [];
-  activeId: string = '';
+  activeId = '';
   sidebarOpen = false;
   scrollPercent = 0;
   exploding = false;
@@ -51,6 +54,18 @@ export class SectionNavComponent implements AfterViewInit {
     } else if (this.scrollPercent < 95) {
       this.hasExploded = false;
     }
+  }
+
+  readonly currentUser = this.authService.currentUser;
+
+  login(): void {
+    this.closeSidebar();
+    this.authService.loginWithGoogle();
+  }
+
+  logout(): void {
+    this.closeSidebar();
+    this.authService.logout();
   }
 
   @HostListener('document:keydown.escape')
