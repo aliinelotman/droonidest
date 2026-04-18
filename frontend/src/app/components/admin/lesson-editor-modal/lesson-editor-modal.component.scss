@@ -1,0 +1,212 @@
+:host { display: contents; }
+
+$cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal-card {
+  background: var(--admin-surface);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 960px;
+  color: var(--admin-text);
+  padding: 8px 0 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid var(--admin-divider);
+
+  h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.modal-card__close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--admin-text-muted);
+}
+
+.modal-card__header-row {
+  display: grid;
+  grid-template-columns: $cols;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--admin-divider);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--admin-text-muted);
+  text-transform: uppercase;
+  align-items: center;
+
+  > span:first-child { grid-column: 3; }
+}
+
+.modal-card__header-cell--center { text-align: center; }
+
+.modal-card__state {
+  padding: 20px 24px;
+  color: var(--admin-text-muted);
+
+  &--error { color: var(--admin-danger); }
+}
+
+.modal-card__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lesson-row {
+  display: grid;
+  grid-template-columns: $cols;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--admin-divider);
+
+  &:last-child { border-bottom: none; }
+}
+
+.lesson-row__drag {
+  color: var(--admin-text-muted);
+  cursor: grab;
+  user-select: none;
+}
+
+.lesson-row__marker {
+  width: 4px;
+  height: 36px;
+  border-radius: 2px;
+  background: var(--admin-row-marker-active);
+
+  &--inactive { background: var(--admin-row-marker-inactive); }
+}
+
+.lesson-row__main { min-width: 0; }
+
+.lesson-row__title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lesson-row__desc {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson-row__tag {
+  justify-self: center;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef1ea;
+  color: var(--admin-primary);
+  font-weight: 500;
+}
+
+.admin-toggle {
+  justify-self: center;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d8d5cf;
+  transition: background-color 150ms ease;
+
+  &__thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 150ms ease;
+  }
+
+  &--on {
+    background: var(--admin-primary);
+    .admin-toggle__thumb { transform: translateX(18px); }
+  }
+}
+
+.admin-icon-btn {
+  justify-self: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-divider);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover { background: #faf7f0; }
+  &--danger { color: var(--admin-danger); }
+}
+
+.modal-card__create-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--admin-divider);
+}
+
+.modal-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--admin-divider);
+}
+
+.modal-card__cancel {
+  background: transparent;
+  border: none;
+  color: var(--admin-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 10px 16px;
+
+  &:hover { color: var(--admin-text); }
+}
+
+.admin-cta {
+  background: var(--admin-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover { background: var(--admin-primary-hover); }
+}
