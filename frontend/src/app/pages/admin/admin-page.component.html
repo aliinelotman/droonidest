@@ -1,0 +1,13 @@
+<main class="admin-page">
+  <div class="admin-page__inner">
+    <app-admin-dashboard-list></app-admin-dashboard-list>
+    <app-study-modules-list (editRequested)="onEditModule($event)"></app-study-modules-list>
+  </div>
+
+  <app-lesson-editor-modal
+    *ngIf="activeModule() as module"
+    [moduleId]="module.id"
+    [moduleTitle]="module.title"
+    (close)="onCloseModal()">
+  </app-lesson-editor-modal>
+</main>

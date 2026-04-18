@@ -1,0 +1,15 @@
+.admin-page {
+  min-height: 100vh;
+  background: var(--admin-bg);
+  padding: 40px 24px;
+  color: var(--admin-text);
+  font-family: var(--font-body);
+}
+
+.admin-page__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
