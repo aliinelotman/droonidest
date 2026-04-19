@@ -21,10 +21,54 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./pages/admin/content/admin-content-page.component').then(
-        (m) => m.AdminContentPageComponent
-      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/admin/landing/admin-landing.component').then(
+            (m) => m.AdminLandingComponent
+          ),
+      },
+      {
+        path: 'content',
+        loadComponent: () =>
+          import('./pages/admin/content/admin-content-page.component').then(
+            (m) => m.AdminContentPageComponent
+          ),
+      },
+      {
+        path: 'users',
+        data: { section: 'users' },
+        loadComponent: () =>
+          import('./pages/admin/stub/admin-stub.component').then(
+            (m) => m.AdminStubComponent
+          ),
+      },
+      {
+        path: 'analytics',
+        data: { section: 'analytics' },
+        loadComponent: () =>
+          import('./pages/admin/stub/admin-stub.component').then(
+            (m) => m.AdminStubComponent
+          ),
+      },
+      {
+        path: 'payments',
+        data: { section: 'payments' },
+        loadComponent: () =>
+          import('./pages/admin/stub/admin-stub.component').then(
+            (m) => m.AdminStubComponent
+          ),
+      },
+      {
+        path: 'email',
+        data: { section: 'email' },
+        loadComponent: () =>
+          import('./pages/admin/stub/admin-stub.component').then(
+            (m) => m.AdminStubComponent
+          ),
+      },
+    ],
   },
   {
     path: 'auth/callback',
