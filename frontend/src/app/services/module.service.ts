@@ -10,12 +10,12 @@ export class ModuleService {
   private readonly apiUrl = environment.apiUrl;
 
   listModules(): Promise<ModuleResponse[]> {
-    return firstValueFrom(this.http.get<ModuleResponse[]>(`${this.apiUrl}/api/modules`));
+    return firstValueFrom(this.http.get<ModuleResponse[]>(`${this.apiUrl}/api/v1/modules`));
   }
 
   listLessons(moduleId: string): Promise<LessonResponse[]> {
     return firstValueFrom(
-      this.http.get<LessonResponse[]>(`${this.apiUrl}/api/modules/${moduleId}/lessons`)
+      this.http.get<LessonResponse[]>(`${this.apiUrl}/api/v1/modules/${moduleId}/lessons`)
     );
   }
 }
