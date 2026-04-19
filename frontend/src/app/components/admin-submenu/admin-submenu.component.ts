@@ -58,6 +58,7 @@ export class AdminSubmenuComponent {
       .subscribe((event) => {
         this.routeIsAdminChild.set(this.computeRouteIsAdminChild(event.urlAfterRedirects));
       });
+    this.destroyRef.onDestroy(() => this.cancelHoverGrace());
   }
 
   private hoverGraceTimer: ReturnType<typeof setTimeout> | null = null;

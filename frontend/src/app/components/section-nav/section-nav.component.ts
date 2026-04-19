@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, AfterViewInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, Input, AfterViewInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AdminSubmenuComponent } from '../admin-submenu/admin-submenu.component';
 import { AuthService } from '../../services/auth.service';
@@ -20,6 +20,7 @@ export interface ModuleLink {
   imports: [RouterModule, AdminSubmenuComponent],
   templateUrl: './section-nav.component.html',
   styleUrl: './section-nav.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SectionNavComponent implements AfterViewInit {
   private readonly authService = inject(AuthService);

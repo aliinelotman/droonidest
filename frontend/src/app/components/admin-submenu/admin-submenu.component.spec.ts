@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AdminSubmenuComponent } from './admin-submenu.component';
 
@@ -118,4 +118,22 @@ describe('AdminSubmenuComponent', () => {
     fixture.detectChanges();
     expect(panel.classList.contains('admin-submenu__panel--open')).toBeTrue();
   });
+
+  it('clears hovered after 150ms grace when mouse leaves trigger', fakeAsync(() => {
+    const component = fixture.componentInstance;
+
+    component.onTriggerEnter();
+    fixture.detectChanges();
+    expect(component.hovered()).toBeTrue();
+
+    component.onTriggerLeave();
+    // timer not yet elapsed
+    tick(149);
+    fixture.detectChanges();
+    expect(component.hovered()).toBeTrue();  // still open
+
+    tick(1);  // now at 150ms
+    fixture.detectChanges();
+    expect(component.hovered()).toBeFalse(); // now cleared
+  }));
 });
