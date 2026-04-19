@@ -51,11 +51,7 @@
     }
     @if (currentUser()?.role === 'ADMIN') {
       <li class="nav__item" [style.--i]="sections.length">
-        <a
-          class="nav__link"
-          routerLink="/admin"
-          (click)="closeSidebar()"
-        >Admin</a>
+        <app-admin-submenu (itemClicked)="onAdminItemClick()"></app-admin-submenu>
       </li>
     }
     <li class="nav__item" [style.--i]="sections.length + (currentUser()?.role === 'ADMIN' ? 1 : 0)">

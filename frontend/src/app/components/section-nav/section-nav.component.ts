@@ -1,5 +1,6 @@
 import { Component, HostListener, Input, AfterViewInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AdminSubmenuComponent } from '../admin-submenu/admin-submenu.component';
 import { AuthService } from '../../services/auth.service';
 
 export interface NavSection {
@@ -16,7 +17,7 @@ export interface ModuleLink {
 @Component({
   selector: 'app-section-nav',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, AdminSubmenuComponent],
   templateUrl: './section-nav.component.html',
   styleUrl: './section-nav.component.scss',
 })
@@ -79,6 +80,10 @@ export class SectionNavComponent implements AfterViewInit {
 
   closeSidebar(): void {
     this.sidebarOpen = false;
+  }
+
+  onAdminItemClick(): void {
+    this.closeSidebar();
   }
 
   scrollTo(sectionId: string): void {
