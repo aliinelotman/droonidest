@@ -22,8 +22,8 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
-      import('./pages/admin/admin-page.component').then(
-        (m) => m.AdminPageComponent
+      import('./pages/admin/content/admin-content-page.component').then(
+        (m) => m.AdminContentPageComponent
       ),
   },
   {
