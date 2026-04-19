@@ -1,22 +1,25 @@
 :host {
   display: block;
-  color: var(--admin-text);
+  color: var(--color-text-light);
 }
 
 .admin-card {
-  background: var(--admin-surface);
-  border-radius: var(--admin-radius);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 12px;
   padding: 16px 0 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
 }
 
 .admin-card__section-heading {
   padding: 0 24px 12px;
 
   h2 {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display);
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 400;
+    color: var(--color-accent);
+    letter-spacing: 0.04em;
   }
 }
 
@@ -27,10 +30,10 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   grid-template-columns: $cols;
   gap: 16px;
   padding: 10px 24px;
-  border-bottom: 1px solid var(--admin-divider);
+  border-bottom: 1px solid var(--color-card-border);
   font-size: 11px;
   letter-spacing: 0.08em;
-  color: var(--admin-text-muted);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   align-items: center;
 
@@ -45,10 +48,10 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
 
 .admin-card__state {
   padding: 20px 24px;
-  color: var(--admin-text-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
 
-  &--error { color: var(--admin-danger); }
+  &--error { color: #d63031; }
 }
 
 .admin-card__rows {
@@ -62,8 +65,8 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   grid-template-columns: $cols;
   align-items: center;
   gap: 16px;
-  padding: var(--admin-row-padding);
-  border-bottom: 1px solid var(--admin-divider);
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-card-border);
 
   &:last-child { border-bottom: none; }
 }
@@ -72,24 +75,26 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   width: 4px;
   height: 36px;
   border-radius: 2px;
-  background: var(--admin-row-marker-active);
+  background: var(--color-accent);
 
   &--inactive {
-    background: var(--admin-row-marker-inactive);
+    background: rgba(255, 255, 255, 0.15);
   }
 }
 
 .admin-row__main { min-width: 0; }
 
 .admin-row__title {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-text-light);
+  letter-spacing: 0.02em;
 }
 
 .admin-row__meta {
   font-size: 12px;
-  color: var(--admin-text-muted);
+  color: var(--color-text-muted);
   margin-top: 2px;
 }
 
@@ -99,14 +104,15 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   height: 36px;
   border-radius: 8px;
   border: none;
-  background: var(--admin-primary);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: #000;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: opacity 150ms ease;
 
-  &:hover { background: var(--admin-primary-hover); }
+  &:hover { opacity: 0.85; }
 }
 
 .admin-toggle {
@@ -115,7 +121,7 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   width: 44px;
   height: 24px;
   border-radius: 999px;
-  background: #d8d5cf;
+  background: rgba(255, 255, 255, 0.12);
   transition: background-color 150ms ease;
 
   &__thumb {
@@ -130,7 +136,7 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   }
 
   &--on {
-    background: var(--admin-primary);
+    background: var(--color-accent);
 
     .admin-toggle__thumb { transform: translateX(20px); }
   }
@@ -141,35 +147,44 @@ $cols: 4px minmax(0, 1fr) 80px 140px 60px 60px;
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1px solid var(--admin-divider);
-  background: var(--admin-surface);
-  color: var(--admin-text);
+  border: 1px solid var(--color-card-border);
+  background: transparent;
+  color: var(--color-text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
 
-  &:hover { background: #faf7f0; }
+  &:hover {
+    color: var(--color-text-light);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 
-  &--danger { color: var(--admin-danger); }
+  &--danger {
+    color: #d63031;
+    &:hover { border-color: #d63031; }
+  }
 }
 
 .admin-card__footer-row {
   display: flex;
   justify-content: center;
   padding: 16px 24px;
-  border-top: 1px solid var(--admin-divider);
+  border-top: 1px solid var(--color-card-border);
 }
 
 .admin-cta {
-  background: var(--admin-primary);
-  color: #ffffff;
+  background: var(--color-accent);
+  color: #000;
   border: none;
   border-radius: 999px;
-  padding: 10px 20px;
+  padding: 10px 24px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: var(--font-body);
   cursor: pointer;
+  transition: opacity 150ms ease;
 
-  &:hover { background: var(--admin-primary-hover); }
+  &:hover { opacity: 0.85; }
 }
