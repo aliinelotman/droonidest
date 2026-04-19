@@ -80,4 +80,42 @@ describe('AdminSubmenuComponent', () => {
     fixture.detectChanges();
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
   });
+
+  it('emits itemClicked when an enabled item is clicked', () => {
+    const spy = jasmine.createSpy('itemClicked');
+    fixture.componentInstance.itemClicked.subscribe(spy);
+    const enabledLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
+      '.admin-submenu__item:nth-child(2) a',
+    );
+    enabledLink.click();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT emit itemClicked when a disabled item is clicked', () => {
+    const spy = jasmine.createSpy('itemClicked');
+    fixture.componentInstance.itemClicked.subscribe(spy);
+    const disabledSpan: HTMLSpanElement = fixture.nativeElement.querySelector(
+      '.admin-submenu__item:nth-child(1) span[aria-disabled="true"]',
+    );
+    disabledSpan.click();
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('clears pinned state when Escape is pressed', () => {
+    fixture.componentInstance.pinned.set(true);
+    fixture.detectChanges();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.pinned()).toBeFalse();
+  });
+
+  it('keeps the panel open while the cursor is over the panel itself', () => {
+    const trigger = fixture.nativeElement.querySelector('.admin-submenu__trigger');
+    const panel = fixture.nativeElement.querySelector('.admin-submenu__panel');
+    trigger.dispatchEvent(new MouseEvent('mouseenter'));
+    trigger.dispatchEvent(new MouseEvent('mouseleave'));
+    panel.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    expect(panel.classList.contains('admin-submenu__panel--open')).toBeTrue();
+  });
 });

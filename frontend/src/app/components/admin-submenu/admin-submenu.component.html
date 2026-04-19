@@ -19,6 +19,8 @@
   [class.admin-submenu__panel--open]="open()"
   role="menu"
   aria-label="Admin sections"
+  (mouseenter)="onPanelEnter()"
+  (mouseleave)="onPanelLeave()"
 >
   <div class="admin-submenu__heading">Admin Options</div>
   <ul class="admin-submenu__list">
@@ -30,12 +32,14 @@
             role="menuitem"
             [routerLink]="item.route"
             routerLinkActive="admin-submenu__link--active"
+            (click)="onItemClick(item)"
           >{{ item.label }}</a>
         } @else {
           <span
             class="admin-submenu__link admin-submenu__link--disabled"
             role="menuitem"
             aria-disabled="true"
+            (click)="onItemClick(item)"
           >{{ item.label }}</span>
         }
       </li>

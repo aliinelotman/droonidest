@@ -3,7 +3,10 @@ import {
   Component,
   computed,
   DestroyRef,
+  EventEmitter,
+  HostListener,
   inject,
+  Output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,6 +18,8 @@ interface AdminSubmenuItem {
   readonly route: string;
   readonly enabled: boolean;
 }
+
+const HOVER_GRACE_MS = 150;
 
 @Component({
   selector: 'app-admin-submenu',
@@ -55,16 +60,57 @@ export class AdminSubmenuComponent {
       });
   }
 
+  private hoverGraceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  @Output() readonly itemClicked = new EventEmitter<void>();
+
   onTriggerClick(): void {
     this.pinned.update((value) => !value);
   }
 
+  onItemClick(item: AdminSubmenuItem): void {
+    if (!item.enabled) return;
+    this.itemClicked.emit();
+  }
+
   onTriggerEnter(): void {
+    this.cancelHoverGrace();
     this.hovered.set(true);
   }
 
   onTriggerLeave(): void {
-    this.hovered.set(false);
+    this.scheduleHoverClear();
+  }
+
+  onPanelEnter(): void {
+    this.cancelHoverGrace();
+    this.hovered.set(true);
+  }
+
+  onPanelLeave(): void {
+    this.scheduleHoverClear();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.pinned()) {
+      this.pinned.set(false);
+    }
+  }
+
+  private scheduleHoverClear(): void {
+    this.cancelHoverGrace();
+    this.hoverGraceTimer = setTimeout(() => {
+      this.hovered.set(false);
+      this.hoverGraceTimer = null;
+    }, HOVER_GRACE_MS);
+  }
+
+  private cancelHoverGrace(): void {
+    if (this.hoverGraceTimer !== null) {
+      clearTimeout(this.hoverGraceTimer);
+      this.hoverGraceTimer = null;
+    }
   }
 
   private computeRouteIsAdminChild(url: string): boolean {
