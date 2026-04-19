@@ -28,7 +28,7 @@
   border-radius: 12px;
   padding: 16px 20px;
   min-width: 240px;
-  z-index: 310;
+  z-index: 310; // above nav overlay (~200), below modals
 
   // Desktop: float to the right of the trigger.
   @media (min-width: 768px) {
@@ -41,7 +41,7 @@
   // Mobile: stack inline below the trigger.
   @media (max-width: 767.98px) {
     position: relative;
-    margin: 8px auto 0;
+    margin: 8px 0 0 16px;
     width: min(85vw, 320px);
   }
 
