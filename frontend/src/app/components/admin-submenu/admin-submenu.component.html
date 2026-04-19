@@ -1,0 +1,38 @@
+<button
+  type="button"
+  class="admin-submenu__trigger"
+  aria-haspopup="menu"
+  aria-controls="admin-submenu-panel"
+>
+  Admin
+  <span class="admin-submenu__chevron" aria-hidden="true">›</span>
+</button>
+
+<div
+  id="admin-submenu-panel"
+  class="admin-submenu__panel"
+  role="menu"
+  aria-label="Admin sections"
+>
+  <div class="admin-submenu__heading">Admin Options</div>
+  <ul class="admin-submenu__list">
+    @for (item of items; track item.route) {
+      <li class="admin-submenu__item" role="none">
+        @if (item.enabled) {
+          <a
+            class="admin-submenu__link"
+            role="menuitem"
+            [routerLink]="item.route"
+            routerLinkActive="admin-submenu__link--active"
+          >{{ item.label }}</a>
+        } @else {
+          <span
+            class="admin-submenu__link admin-submenu__link--disabled"
+            role="menuitem"
+            aria-disabled="true"
+          >{{ item.label }}</span>
+        }
+      </li>
+    }
+  </ul>
+</div>
