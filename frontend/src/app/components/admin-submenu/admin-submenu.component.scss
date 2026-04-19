@@ -28,6 +28,22 @@
   border-radius: 12px;
   padding: 16px 20px;
   min-width: 240px;
+  z-index: 310;
+
+  // Desktop: float to the right of the trigger.
+  @media (min-width: 768px) {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 16px);
+    transform: translateY(-50%);
+  }
+
+  // Mobile: stack inline below the trigger.
+  @media (max-width: 767.98px) {
+    position: relative;
+    margin: 8px auto 0;
+    width: min(85vw, 320px);
+  }
 
   &--open {
     display: block;
