@@ -23,11 +23,20 @@
 }
 
 .admin-submenu__panel {
-  display: none; // Task 6 will toggle via [class.admin-submenu__panel--open]
+  display: none;
   background: rgba(20, 32, 54, 0.95);
   border-radius: 12px;
   padding: 16px 20px;
   min-width: 240px;
+
+  &--open {
+    display: block;
+  }
+}
+
+.admin-submenu__trigger--open {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .admin-submenu__heading {

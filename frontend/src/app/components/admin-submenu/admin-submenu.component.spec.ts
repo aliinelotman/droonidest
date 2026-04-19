@@ -40,4 +40,44 @@ describe('AdminSubmenuComponent', () => {
     expect(items[0].querySelector('a')).toBeFalsy();
     expect(items[0].querySelector('span[aria-disabled="true"]')).toBeTruthy();
   });
+
+  it('starts with the panel closed', () => {
+    const panel = fixture.nativeElement.querySelector('.admin-submenu__panel');
+    expect(panel.classList.contains('admin-submenu__panel--open')).toBeFalse();
+  });
+
+  it('opens the panel when the trigger is clicked, and pins it', () => {
+    const trigger = fixture.nativeElement.querySelector('.admin-submenu__trigger');
+    trigger.click();
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.admin-submenu__panel');
+    expect(panel.classList.contains('admin-submenu__panel--open')).toBeTrue();
+  });
+
+  it('closes the panel when the trigger is clicked twice', () => {
+    const trigger = fixture.nativeElement.querySelector('.admin-submenu__trigger');
+    trigger.click();
+    trigger.click();
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.admin-submenu__panel');
+    expect(panel.classList.contains('admin-submenu__panel--open')).toBeFalse();
+  });
+
+  it('opens the panel on mouseenter (hover) without pinning', () => {
+    const trigger = fixture.nativeElement.querySelector('.admin-submenu__trigger');
+    trigger.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.admin-submenu__panel');
+    expect(panel.classList.contains('admin-submenu__panel--open')).toBeTrue();
+  });
+
+  it('sets aria-expanded on the trigger to reflect open state', () => {
+    const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.admin-submenu__trigger',
+    );
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    trigger.click();
+    fixture.detectChanges();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  });
 });
