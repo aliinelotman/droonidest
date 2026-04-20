@@ -1,0 +1,59 @@
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="lesson-editor-title">
+  <div class="modal-card">
+    <header class="modal-card__header">
+      <h2 id="lesson-editor-title">Edit {{ moduleTitle || 'Module' }}</h2>
+      <button type="button" class="modal-card__close" (click)="onClose()" aria-label="Close">✕</button>
+    </header>
+
+    <div class="modal-card__header-row">
+      <span>LESSON</span>
+      <span class="modal-card__header-cell--center">TYPE</span>
+      <span class="modal-card__header-cell--center">ACTIVE</span>
+      <span class="modal-card__header-cell--center">EDIT</span>
+      <span class="modal-card__header-cell--center">DELETE</span>
+    </div>
+
+    <p *ngIf="loading()" class="modal-card__state">Loading lessons…</p>
+    <p *ngIf="errorMessage() as err" class="modal-card__state modal-card__state--error">{{ err }}</p>
+
+    <ul *ngIf="!loading() && !errorMessage()" class="modal-card__rows">
+      <li class="lesson-row" *ngFor="let lesson of lessons()">
+        <span class="lesson-row__drag" aria-hidden="true">⋮⋮</span>
+        <span
+          class="lesson-row__marker"
+          [class.lesson-row__marker--inactive]="!isActive(lesson)"
+          aria-hidden="true"></span>
+        <div class="lesson-row__main">
+          <p class="lesson-row__title">{{ lesson.title }}</p>
+          <p class="lesson-row__desc">{{ lesson.content }}</p>
+        </div>
+        <span class="lesson-row__tag">{{ typeTag(lesson) }}</span>
+        <span class="admin-toggle" [class.admin-toggle--on]="isActive(lesson)" aria-hidden="true">
+          <span class="admin-toggle__thumb"></span>
+        </span>
+        <button type="button" class="admin-icon-btn" aria-label="Edit lesson">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+          </svg>
+        </button>
+        <button type="button" class="admin-icon-btn admin-icon-btn--danger" aria-label="Delete lesson">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 6h18"/>
+            <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          </svg>
+        </button>
+      </li>
+    </ul>
+
+    <div *ngIf="!loading() && !errorMessage()" class="modal-card__create-row">
+      <button type="button" class="admin-cta">+ Create New Lesson</button>
+    </div>
+
+    <footer class="modal-card__footer">
+      <button type="button" class="modal-card__cancel" (click)="onClose()">Cancel</button>
+      <button type="button" class="admin-cta">Save</button>
+    </footer>
+  </div>
+</div>

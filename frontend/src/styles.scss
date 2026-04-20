@@ -18,6 +18,20 @@
 
   --container-max: 1200px;
   --section-padding: 80px 24px;
+
+  /* Admin editor palette (scoped to /admin surfaces) */
+  --admin-bg: #f5f1e8;
+  --admin-surface: #ffffff;
+  --admin-primary: #2d5043;
+  --admin-primary-hover: #24413a;
+  --admin-danger: #d4493a;
+  --admin-row-marker-active: #2d5043;
+  --admin-row-marker-inactive: #d9d4e0;
+  --admin-divider: #e8e4db;
+  --admin-text: #1a1a2e;
+  --admin-text-muted: #7b7b85;
+  --admin-radius: 8px;
+  --admin-row-padding: 16px 20px;
 }
 
 *,

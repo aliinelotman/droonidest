@@ -1,0 +1,24 @@
+<section class="admin-card">
+  <header class="admin-card__section-heading">
+    <h2>Admin Dashboard</h2>
+  </header>
+
+  <div class="admin-card__header-row">
+    <span class="admin-card__header-cell admin-card__header-cell--right">OPEN</span>
+  </div>
+
+  <ul class="admin-card__rows">
+    <li class="admin-row" *ngFor="let category of categories">
+      <span class="admin-row__marker" aria-hidden="true"></span>
+      <div class="admin-row__main">
+        <p class="admin-row__title">{{ category.title }}</p>
+        <p class="admin-row__meta">Modified {{ category.modifiedAt | date:'yyyy-MM-dd' }}</p>
+      </div>
+      <button type="button" class="admin-row__play" aria-label="Open">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+    </li>
+  </ul>
+</section>

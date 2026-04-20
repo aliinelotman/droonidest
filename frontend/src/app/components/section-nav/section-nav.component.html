@@ -49,7 +49,12 @@
         >{{ section.label }}</button>
       </li>
     }
-    <li class="nav__item" [style.--i]="sections.length">
+    @if (currentUser()?.role === 'ADMIN') {
+      <li class="nav__item" [style.--i]="sections.length">
+        <app-admin-submenu (itemClicked)="onAdminItemClick()"></app-admin-submenu>
+      </li>
+    }
+    <li class="nav__item" [style.--i]="sections.length + (currentUser()?.role === 'ADMIN' ? 1 : 0)">
       @if (currentUser()) {
         <button class="nav__link" (click)="logout()">Logout</button>
       } @else {
@@ -58,7 +63,7 @@
     </li>
     @if (moduleLinks.length) {
       @for (link of moduleLinks; track link.route; let i = $index) {
-        <li class="nav__item nav__item--module" [style.--i]="sections.length + 1 + i">
+        <li class="nav__item nav__item--module" [style.--i]="sections.length + (currentUser()?.role === 'ADMIN' ? 2 : 1) + i">
           <a
             class="nav__link nav__link--module"
             [class.nav__link--active]="link.active"
