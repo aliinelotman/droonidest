@@ -1,0 +1,59 @@
+<section class="admin-card">
+  <header class="admin-card__section-heading">
+    <h2>Study Modules</h2>
+  </header>
+
+  <div class="admin-card__header-row">
+    <span>MODULE NAME</span>
+    <span class="admin-card__header-cell--center">OPEN</span>
+    <span class="admin-card__header-cell--center">ACTIVE/INACTIVE</span>
+    <span class="admin-card__header-cell--center">EDIT</span>
+    <span class="admin-card__header-cell--center">DELETE</span>
+  </div>
+
+  <p *ngIf="loading()" class="admin-card__state">Loading modules…</p>
+  <p *ngIf="errorMessage() as err" class="admin-card__state admin-card__state--error">{{ err }}</p>
+
+  <ul *ngIf="!loading() && !errorMessage()" class="admin-card__rows">
+    <li class="admin-row" *ngFor="let module of modules()">
+      <span
+        class="admin-row__marker"
+        [class.admin-row__marker--inactive]="!isActive(module)"
+        aria-hidden="true"></span>
+
+      <div class="admin-row__main">
+        <p class="admin-row__title">{{ module.title }}</p>
+        <p class="admin-row__meta">Modified {{ module.updatedAt | date:'yyyy-MM-dd' }}</p>
+      </div>
+
+      <button type="button" class="admin-row__play" aria-label="Open module">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+
+      <span class="admin-toggle" [class.admin-toggle--on]="isActive(module)" aria-hidden="true">
+        <span class="admin-toggle__thumb"></span>
+      </span>
+
+      <button type="button" class="admin-icon-btn" (click)="onEdit(module)" aria-label="Edit module">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>
+      </button>
+
+      <button type="button" class="admin-icon-btn admin-icon-btn--danger" aria-label="Delete module">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 6h18"/>
+          <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+        </svg>
+      </button>
+    </li>
+  </ul>
+
+  <div *ngIf="!loading() && !errorMessage()" class="admin-card__footer-row">
+    <button type="button" class="admin-cta">+ Create New Module</button>
+  </div>
+</section>
