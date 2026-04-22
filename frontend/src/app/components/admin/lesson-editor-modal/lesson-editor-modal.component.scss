@@ -1,4 +1,6 @@
-:host { display: contents; }
+:host {
+  display: contents;
+}
 
 $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
 
@@ -58,16 +60,22 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   text-transform: uppercase;
   align-items: center;
 
-  > span:first-child { grid-column: 3; }
+  > span:first-child {
+    grid-column: 3;
+  }
 }
 
-.modal-card__header-cell--center { text-align: center; }
+.modal-card__header-cell--center {
+  text-align: center;
+}
 
 .modal-card__state {
   padding: 20px 24px;
   color: var(--admin-text-muted);
 
-  &--error { color: var(--admin-danger); }
+  &--error {
+    color: var(--admin-danger);
+  }
 }
 
 .modal-card__rows {
@@ -84,7 +92,9 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--admin-divider);
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .lesson-row__drag {
@@ -99,10 +109,14 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   border-radius: 2px;
   background: var(--admin-row-marker-active);
 
-  &--inactive { background: var(--admin-row-marker-inactive); }
+  &--inactive {
+    background: var(--admin-row-marker-inactive);
+  }
 }
 
-.lesson-row__main { min-width: 0; }
+.lesson-row__main {
+  min-width: 0;
+}
 
 .lesson-row__title {
   font-family: Georgia, 'Times New Roman', serif;
@@ -151,7 +165,9 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
 
   &--on {
     background: var(--admin-primary);
-    .admin-toggle__thumb { transform: translateX(18px); }
+    .admin-toggle__thumb {
+      transform: translateX(18px);
+    }
   }
 }
 
@@ -168,8 +184,12 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   justify-content: center;
   cursor: pointer;
 
-  &:hover { background: #faf7f0; }
-  &--danger { color: var(--admin-danger); }
+  &:hover {
+    background: #faf7f0;
+  }
+  &--danger {
+    color: var(--admin-danger);
+  }
 }
 
 .modal-card__create-row {
@@ -195,7 +215,9 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   cursor: pointer;
   padding: 10px 16px;
 
-  &:hover { color: var(--admin-text); }
+  &:hover {
+    color: var(--admin-text);
+  }
 }
 
 .admin-cta {
@@ -208,5 +230,185 @@ $cols: 20px 4px minmax(0, 1fr) 100px 80px 60px 60px;
   font-weight: 500;
   cursor: pointer;
 
-  &:hover { background: var(--admin-primary-hover); }
+  &:hover:not(:disabled) {
+    background: var(--admin-primary-hover);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Lesson badge ── */
+
+.lesson-row__badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: #eef1ea;
+  color: var(--admin-text-muted);
+}
+
+/* ── Nested modal overlay ── */
+
+.modal-backdrop--nested {
+  z-index: 1100;
+}
+
+.modal-card--narrow {
+  max-width: 640px;
+}
+
+/* ── Lesson form (create + edit) ── */
+
+.lesson-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+
+  &--padded {
+    padding: 20px 24px;
+  }
+}
+
+.lesson-form__row {
+  display: flex;
+  gap: 12px;
+}
+
+.lesson-form__label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--admin-text-muted);
+
+  &--grow {
+    flex: 1;
+  }
+}
+
+.lesson-form__input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--admin-divider);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+
+  &::placeholder {
+    color: var(--admin-text-muted);
+  }
+  &:focus {
+    border-color: var(--admin-primary);
+  }
+}
+
+.lesson-form__select {
+  padding: 10px 14px;
+  border: 1px solid var(--admin-divider);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+
+  &:focus {
+    border-color: var(--admin-primary);
+  }
+}
+
+.lesson-form__textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--admin-divider);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+
+  &::placeholder {
+    color: var(--admin-text-muted);
+  }
+  &:focus {
+    border-color: var(--admin-primary);
+  }
+}
+
+.lesson-form__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+/* ── Delete confirmation ── */
+
+.confirm-dialog {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-divider);
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.confirm-dialog__title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin: 0 0 12px;
+}
+
+.confirm-dialog__message {
+  font-size: 14px;
+  color: var(--admin-text-muted);
+  line-height: 1.5;
+  margin: 0 0 24px;
+
+  strong {
+    color: var(--admin-text);
+  }
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.confirm-dialog__delete {
+  background: var(--admin-danger);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }

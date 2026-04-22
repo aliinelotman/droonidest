@@ -19,41 +19,134 @@
       <span
         class="admin-row__marker"
         [class.admin-row__marker--inactive]="!isActive(module)"
-        aria-hidden="true"></span>
+        aria-hidden="true"
+      ></span>
 
       <div class="admin-row__main">
-        <p class="admin-row__title">{{ module.title }}</p>
-        <p class="admin-row__meta">Modified {{ module.updatedAt | date:'yyyy-MM-dd' }}</p>
+        <p class="admin-row__title">
+          {{ module.title }}
+          <span *ngIf="module.status === 'DRAFT'" class="admin-row__badge">DRAFT</span>
+          <span
+            *ngIf="module.status === 'ARCHIVED'"
+            class="admin-row__badge admin-row__badge--archived"
+            >ARCHIVED</span
+          >
+        </p>
+        <p class="admin-row__meta">Modified {{ module.updatedAt | date: 'yyyy-MM-dd' }}</p>
       </div>
 
-      <button type="button" class="admin-row__play" aria-label="Open module">
+      <button type="button" class="admin-row__play" (click)="onOpen()" aria-label="Open module">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-          <path d="M8 5v14l11-7z"/>
+          <path d="M8 5v14l11-7z" />
         </svg>
       </button>
 
-      <span class="admin-toggle" [class.admin-toggle--on]="isActive(module)" aria-hidden="true">
+      <button
+        type="button"
+        class="admin-toggle"
+        [class.admin-toggle--on]="isActive(module)"
+        (click)="onToggle(module)"
+        [attr.aria-label]="isActive(module) ? 'Deactivate module' : 'Activate module'"
+        role="switch"
+        [attr.aria-checked]="isActive(module)"
+      >
         <span class="admin-toggle__thumb"></span>
-      </span>
+      </button>
 
-      <button type="button" class="admin-icon-btn" (click)="onEdit(module)" aria-label="Edit module">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+      <button
+        type="button"
+        class="admin-icon-btn"
+        (click)="onEdit(module)"
+        aria-label="Edit module"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
         </svg>
       </button>
 
-      <button type="button" class="admin-icon-btn admin-icon-btn--danger" aria-label="Delete module">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M3 6h18"/>
-          <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+      <button
+        type="button"
+        class="admin-icon-btn admin-icon-btn--danger"
+        (click)="onDeleteRequest(module)"
+        aria-label="Delete module"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M3 6h18" />
+          <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
         </svg>
       </button>
     </li>
   </ul>
 
   <div *ngIf="!loading() && !errorMessage()" class="admin-card__footer-row">
-    <button type="button" class="admin-cta">+ Create New Module</button>
+    <button *ngIf="!showCreateForm()" type="button" class="admin-cta" (click)="onCreateOpen()">
+      + Create New Module
+    </button>
+
+    <form *ngIf="showCreateForm()" class="create-form" (ngSubmit)="onCreateSubmit()">
+      <input
+        type="text"
+        class="create-form__input"
+        placeholder="Module title"
+        [ngModel]="createTitle()"
+        (ngModelChange)="createTitle.set($event)"
+        name="title"
+        required
+      />
+      <input
+        type="text"
+        class="create-form__input create-form__input--wide"
+        placeholder="Short description (optional)"
+        [ngModel]="createDescription()"
+        (ngModelChange)="createDescription.set($event)"
+        name="description"
+      />
+      <button type="submit" class="admin-cta" [disabled]="creating() || !createTitle().trim()">
+        {{ creating() ? 'Creating…' : 'Create' }}
+      </button>
+      <button type="button" class="create-form__cancel" (click)="onCreateCancel()">Cancel</button>
+    </form>
   </div>
 </section>
+
+<!-- Delete confirmation dialog -->
+<div *ngIf="deleteTarget() as target" class="confirm-backdrop" (click)="onDeleteCancel()">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <h3 class="confirm-dialog__title">Delete Module</h3>
+    <p class="confirm-dialog__message">
+      Are you sure you want to delete <strong>{{ target.title }}</strong
+      >? This action cannot be undone.
+    </p>
+    <div class="confirm-dialog__actions">
+      <button type="button" class="confirm-dialog__cancel" (click)="onDeleteCancel()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="confirm-dialog__delete"
+        (click)="onDeleteConfirm()"
+        [disabled]="deleting()"
+      >
+        {{ deleting() ? 'Deleting…' : 'Delete' }}
+      </button>
+    </div>
+  </div>
+</div>

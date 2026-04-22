@@ -2,7 +2,9 @@
   <div class="modal-card">
     <header class="modal-card__header">
       <h2 id="lesson-editor-title">Edit {{ moduleTitle || 'Module' }}</h2>
-      <button type="button" class="modal-card__close" (click)="onClose()" aria-label="Close">✕</button>
+      <button type="button" class="modal-card__close" (click)="onClose()" aria-label="Close">
+        ✕
+      </button>
     </header>
 
     <div class="modal-card__header-row">
@@ -14,7 +16,9 @@
     </div>
 
     <p *ngIf="loading()" class="modal-card__state">Loading lessons…</p>
-    <p *ngIf="errorMessage() as err" class="modal-card__state modal-card__state--error">{{ err }}</p>
+    <p *ngIf="errorMessage() as err" class="modal-card__state modal-card__state--error">
+      {{ err }}
+    </p>
 
     <ul *ngIf="!loading() && !errorMessage()" class="modal-card__rows">
       <li class="lesson-row" *ngFor="let lesson of lessons()">
@@ -22,38 +26,233 @@
         <span
           class="lesson-row__marker"
           [class.lesson-row__marker--inactive]="!isActive(lesson)"
-          aria-hidden="true"></span>
+          aria-hidden="true"
+        ></span>
         <div class="lesson-row__main">
-          <p class="lesson-row__title">{{ lesson.title }}</p>
+          <p class="lesson-row__title">
+            {{ lesson.title }}
+            <span *ngIf="lesson.status === 'DRAFT'" class="lesson-row__badge">DRAFT</span>
+          </p>
           <p class="lesson-row__desc">{{ lesson.content }}</p>
         </div>
         <span class="lesson-row__tag">{{ typeTag(lesson) }}</span>
         <span class="admin-toggle" [class.admin-toggle--on]="isActive(lesson)" aria-hidden="true">
           <span class="admin-toggle__thumb"></span>
         </span>
-        <button type="button" class="admin-icon-btn" aria-label="Edit lesson">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M12 20h9"/>
-            <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        <button
+          type="button"
+          class="admin-icon-btn"
+          (click)="onEditLesson(lesson)"
+          aria-label="Edit lesson"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
           </svg>
         </button>
-        <button type="button" class="admin-icon-btn admin-icon-btn--danger" aria-label="Delete lesson">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M3 6h18"/>
-            <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+        <button
+          type="button"
+          class="admin-icon-btn admin-icon-btn--danger"
+          (click)="onDeleteRequest(lesson)"
+          aria-label="Delete lesson"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
           </svg>
         </button>
       </li>
     </ul>
 
+    <!-- Create lesson form -->
     <div *ngIf="!loading() && !errorMessage()" class="modal-card__create-row">
-      <button type="button" class="admin-cta">+ Create New Lesson</button>
+      <button *ngIf="!showCreateForm()" type="button" class="admin-cta" (click)="onCreateOpen()">
+        + Create New Lesson
+      </button>
+
+      <form *ngIf="showCreateForm()" class="lesson-form" (ngSubmit)="onCreateSubmit()">
+        <div class="lesson-form__row">
+          <input
+            type="text"
+            class="lesson-form__input"
+            placeholder="Lesson title"
+            [ngModel]="createTitle()"
+            (ngModelChange)="createTitle.set($event)"
+            name="title"
+            required
+          />
+          <select
+            class="lesson-form__select"
+            [ngModel]="createFormat()"
+            (ngModelChange)="createFormat.set($event)"
+            name="format"
+          >
+            <option value="MARKDOWN">Markdown</option>
+            <option value="HTML">HTML</option>
+          </select>
+          <select
+            class="lesson-form__select"
+            [ngModel]="createIsVideo()"
+            (ngModelChange)="createIsVideo.set($event === 'true')"
+            name="type"
+          >
+            <option [ngValue]="false">Read</option>
+            <option [ngValue]="true">Video</option>
+          </select>
+        </div>
+        <textarea
+          class="lesson-form__textarea"
+          placeholder="Lesson content"
+          rows="4"
+          [ngModel]="createContent()"
+          (ngModelChange)="createContent.set($event)"
+          name="content"
+        ></textarea>
+        <input
+          *ngIf="createIsVideo()"
+          type="url"
+          class="lesson-form__input"
+          placeholder="Video URL"
+          [ngModel]="createVideoUrl()"
+          (ngModelChange)="createVideoUrl.set($event)"
+          name="videoUrl"
+        />
+        <div class="lesson-form__actions">
+          <button type="submit" class="admin-cta" [disabled]="creating() || !createTitle().trim()">
+            {{ creating() ? 'Creating…' : 'Create Lesson' }}
+          </button>
+          <button type="button" class="modal-card__cancel" (click)="onCreateCancel()">
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
 
     <footer class="modal-card__footer">
-      <button type="button" class="modal-card__cancel" (click)="onClose()">Cancel</button>
-      <button type="button" class="admin-cta">Save</button>
+      <button type="button" class="modal-card__cancel" (click)="onClose()">Close</button>
     </footer>
+  </div>
+</div>
+
+<!-- Edit lesson overlay -->
+<div
+  *ngIf="editingLesson() as lesson"
+  class="modal-backdrop modal-backdrop--nested"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-card modal-card--narrow">
+    <header class="modal-card__header">
+      <h2>Edit Lesson</h2>
+      <button type="button" class="modal-card__close" (click)="onEditCancel()" aria-label="Close">
+        ✕
+      </button>
+    </header>
+
+    <form class="lesson-form lesson-form--padded" (ngSubmit)="onEditSave()">
+      <label class="lesson-form__label">
+        Title
+        <input
+          type="text"
+          class="lesson-form__input"
+          [ngModel]="editTitle()"
+          (ngModelChange)="editTitle.set($event)"
+          name="editTitle"
+          required
+        />
+      </label>
+      <div class="lesson-form__row">
+        <label class="lesson-form__label lesson-form__label--grow">
+          Format
+          <select
+            class="lesson-form__select"
+            [ngModel]="editFormat()"
+            (ngModelChange)="editFormat.set($event)"
+            name="editFormat"
+          >
+            <option value="MARKDOWN">Markdown</option>
+            <option value="HTML">HTML</option>
+          </select>
+        </label>
+        <label class="lesson-form__label lesson-form__label--grow">
+          Type
+          <select
+            class="lesson-form__select"
+            [ngModel]="editIsVideo()"
+            (ngModelChange)="editIsVideo.set($event === 'true')"
+            name="editType"
+          >
+            <option [ngValue]="false">Read</option>
+            <option [ngValue]="true">Video</option>
+          </select>
+        </label>
+      </div>
+      <label class="lesson-form__label">
+        Content
+        <textarea
+          class="lesson-form__textarea"
+          rows="8"
+          [ngModel]="editContent()"
+          (ngModelChange)="editContent.set($event)"
+          name="editContent"
+        ></textarea>
+      </label>
+      <label *ngIf="editIsVideo()" class="lesson-form__label">
+        Video URL
+        <input
+          type="url"
+          class="lesson-form__input"
+          placeholder="https://..."
+          [ngModel]="editVideoUrl()"
+          (ngModelChange)="editVideoUrl.set($event)"
+          name="editVideoUrl"
+        />
+      </label>
+      <div class="lesson-form__actions">
+        <button type="submit" class="admin-cta" [disabled]="saving() || !editTitle().trim()">
+          {{ saving() ? 'Saving…' : 'Save' }}
+        </button>
+        <button type="button" class="modal-card__cancel" (click)="onEditCancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete lesson confirmation -->
+<div *ngIf="deleteTarget() as target" class="modal-backdrop modal-backdrop--nested">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <h3 class="confirm-dialog__title">Delete Lesson</h3>
+    <p class="confirm-dialog__message">
+      Are you sure you want to delete <strong>{{ target.title }}</strong
+      >? This action cannot be undone.
+    </p>
+    <div class="confirm-dialog__actions">
+      <button type="button" class="modal-card__cancel" (click)="onDeleteCancel()">Cancel</button>
+      <button
+        type="button"
+        class="confirm-dialog__delete"
+        (click)="onDeleteConfirm()"
+        [disabled]="deleting()"
+      >
+        {{ deleting() ? 'Deleting…' : 'Delete' }}
+      </button>
+    </div>
   </div>
 </div>
