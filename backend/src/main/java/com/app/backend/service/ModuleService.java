@@ -22,7 +22,7 @@ public class ModuleService {
     public List<ModuleResponse> getAll() {
         return moduleRepository.findAllByStatusOrderBySortOrder(ContentStatus.PUBLISHED)
                 .stream()
-                .map(this::toResponse)
+                .map(ModuleResponse::from)
                 .toList();
     }
 
@@ -30,20 +30,6 @@ public class ModuleService {
         Module module = moduleRepository.findById(id)
                 .filter(m -> m.getStatus() == ContentStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", id));
-        return toResponse(module);
-    }
-
-    private ModuleResponse toResponse(Module module) {
-        return new ModuleResponse(
-                module.getId(),
-                module.getTitle(),
-                module.getDescription(),
-                module.getThumbnailUrl(),
-                module.getStatus(),
-                module.getSortOrder(),
-                module.isIfFreePreview(),
-                module.getCreatedAt(),
-                module.getUpdatedAt()
-        );
+        return ModuleResponse.from(module);
     }
 }

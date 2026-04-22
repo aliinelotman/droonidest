@@ -19,4 +19,21 @@ public interface ModuleLessonRepository extends JpaRepository<ModuleLesson, Modu
     List<ModuleLesson> findByModuleIdAndLessonStatus(
             @Param("moduleId") UUID moduleId,
             @Param("lessonStatus") ContentStatus lessonStatus);
+
+    @Query("SELECT ml FROM ModuleLesson ml " +
+           "JOIN FETCH ml.lesson l " +
+           "WHERE ml.module.id = :moduleId " +
+           "ORDER BY ml.sortOrder")
+    List<ModuleLesson> findByModuleIdOrderBySortOrder(@Param("moduleId") UUID moduleId);
+
+    @Query("SELECT ml FROM ModuleLesson ml " +
+           "JOIN FETCH ml.lesson l " +
+           "WHERE l.id = :lessonId")
+    List<ModuleLesson> findByLessonId(@Param("lessonId") UUID lessonId);
+
+    long countByModuleId(UUID moduleId);
+
+    void deleteByModuleId(UUID moduleId);
+
+    void deleteByLessonId(UUID lessonId);
 }
