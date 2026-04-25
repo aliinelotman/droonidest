@@ -12,6 +12,7 @@ import com.app.backend.repository.LessonRepository;
 import com.app.backend.repository.ModuleLessonRepository;
 import com.app.backend.repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class ManageLessonService {
 
@@ -37,6 +39,7 @@ public class ManageLessonService {
      */
     @Transactional
     public LessonResponse create(UUID moduleId, CreateLessonRequest request) {
+        log.info("Creating lesson in moduleId={} title={}", moduleId, request.getTitle());
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", moduleId));
 
@@ -51,7 +54,9 @@ public class ManageLessonService {
         ModuleLesson link = new ModuleLesson(module, lesson, nextSortOrder);
         moduleLessonRepository.save(link);
 
-        return toResponse(lesson, moduleId);
+        LessonResponse response = toResponse(lesson, moduleId);
+        log.info("Created lesson id={} in moduleId={} sortOrder={}", response.getId(), moduleId, nextSortOrder);
+        return response;
     }
 
     /**
@@ -60,13 +65,16 @@ public class ManageLessonService {
      * @throws ResourceNotFoundException if the lesson does not exist
      */
     public LessonResponse getById(UUID id) {
+        log.debug("Loading managed lesson id={}", id);
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", id));
 
         List<ModuleLesson> links = moduleLessonRepository.findByLessonId(id);
         UUID moduleId = links.isEmpty() ? null : links.getFirst().getId().getModuleId();
 
-        return toResponse(lesson, moduleId);
+        LessonResponse response = toResponse(lesson, moduleId);
+        log.debug("Loaded managed lesson id={} moduleId={}", id, moduleId);
+        return response;
     }
 
     /**
@@ -76,6 +84,7 @@ public class ManageLessonService {
      */
     @Transactional
     public LessonResponse update(UUID id, UpdateLessonRequest request) {
+        log.info("Updating lesson id={} title={}", id, request.getTitle());
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", id));
 
@@ -89,7 +98,9 @@ public class ManageLessonService {
         List<ModuleLesson> links = moduleLessonRepository.findByLessonId(id);
         UUID moduleId = links.isEmpty() ? null : links.getFirst().getId().getModuleId();
 
-        return toResponse(lesson, moduleId);
+        LessonResponse response = toResponse(lesson, moduleId);
+        log.info("Updated lesson id={} moduleId={} status={}", response.getId(), moduleId, response.getStatus());
+        return response;
     }
 
     /**
@@ -99,11 +110,13 @@ public class ManageLessonService {
      */
     @Transactional
     public void delete(UUID id) {
+        log.info("Deleting lesson id={}", id);
         if (!lessonRepository.existsById(id)) {
             throw new ResourceNotFoundException("Lesson", id);
         }
         moduleLessonRepository.deleteByLessonId(id);
         lessonRepository.deleteById(id);
+        log.info("Deleted lesson id={}", id);
     }
 
     private LessonResponse toResponse(Lesson lesson, UUID moduleId) {

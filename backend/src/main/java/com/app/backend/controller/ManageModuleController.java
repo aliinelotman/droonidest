@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/manage/modules")
 @RequiredArgsConstructor
+@Slf4j
 @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
 @Tag(name = "Manage Modules", description = "Content management endpoints for modules")
 public class ManageModuleController {
@@ -45,7 +47,10 @@ public class ManageModuleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ModuleResponse createModule(@Valid @RequestBody CreateModuleRequest request) {
-        return manageModuleService.create(request);
+        log.info("Creating module title={}", request.getTitle());
+        ModuleResponse module = manageModuleService.create(request);
+        log.info("Created module id={} title={}", module.getId(), module.getTitle());
+        return module;
     }
 
     /**
@@ -58,7 +63,10 @@ public class ManageModuleController {
     )
     @GetMapping
     public List<ModuleResponse> getAllModules() {
-        return manageModuleService.getAll();
+        log.debug("Listing all managed modules");
+        List<ModuleResponse> modules = manageModuleService.getAll();
+        log.debug("Returning {} managed modules", modules.size());
+        return modules;
     }
 
     /**
@@ -74,7 +82,10 @@ public class ManageModuleController {
     )
     @GetMapping("/{id}")
     public ModuleDetailResponse getModule(@PathVariable UUID id) {
-        return manageModuleService.getById(id);
+        log.debug("Fetching managed module id={}", id);
+        ModuleDetailResponse module = manageModuleService.getById(id);
+        log.debug("Returning managed module id={}", id);
+        return module;
     }
 
     /**
@@ -90,7 +101,10 @@ public class ManageModuleController {
     )
     @PutMapping("/{id}")
     public ModuleResponse updateModule(@PathVariable UUID id, @Valid @RequestBody UpdateModuleRequest request) {
-        return manageModuleService.update(id, request);
+        log.info("Updating module id={} title={} status={}", id, request.getTitle(), request.getStatus());
+        ModuleResponse module = manageModuleService.update(id, request);
+        log.info("Updated module id={} status={}", module.getId(), module.getStatus());
+        return module;
     }
 
     /**
@@ -105,7 +119,9 @@ public class ManageModuleController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
+        log.info("Deleting module id={}", id);
         manageModuleService.delete(id);
+        log.info("Deleted module id={}", id);
         return ResponseEntity.noContent().build();
     }
 }

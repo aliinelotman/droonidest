@@ -43,6 +43,7 @@ public class AuthService {
      */
     public String buildGoogleAuthorizeUrl() {
         String state = jwtService.generateStateToken();
+        log.debug("Generated OAuth state token for Google authorize URL");
         return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZE_URI)
                 .queryParam("client_id", googleProperties.clientId())
                 .queryParam("redirect_uri", googleProperties.redirectUri())
@@ -63,6 +64,7 @@ public class AuthService {
      * @throws InvalidTokenException if the state token is invalid or expired
      */
     public AuthResponse authenticateWithGoogle(String authorizationCode, String state) {
+        log.info("Authenticating user with Google OAuth");
         validateOAuthState(state);
         String googleAccessToken = exchangeCodeForAccessToken(authorizationCode);
         Map<String, Object> userInfo = fetchGoogleUserInfo(googleAccessToken);
@@ -78,6 +80,7 @@ public class AuthService {
      * @throws InvalidTokenException if the token is invalid or not a refresh token
      */
     public AuthResponse refreshAuth(String refreshToken) {
+        log.debug("Refreshing authentication session");
         var claims = jwtService.parseToken(refreshToken);
 
         if (claims == null || !jwtService.isRefreshToken(claims)) {
@@ -88,6 +91,7 @@ public class AuthService {
         User user = userService.findById(userId);
         String accessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
+        log.info("Refreshed authentication");
         return new AuthResponse(accessToken, userService.toResponse(user), newRefreshToken);
     }
 
@@ -99,6 +103,7 @@ public class AuthService {
     }
 
     private void validateOAuthState(String state) {
+        log.debug("Validating OAuth state token");
         var claims = jwtService.parseToken(state);
         if (claims == null || !jwtService.isStateToken(claims)) {
             throw new InvalidTokenException("Invalid or expired OAuth state");
@@ -106,6 +111,7 @@ public class AuthService {
     }
 
     private String exchangeCodeForAccessToken(String code) {
+        log.debug("Exchanging Google authorization code for access token");
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("code", code);
         formData.add("client_id", googleProperties.clientId());
@@ -129,10 +135,12 @@ public class AuthService {
             throw new InvalidTokenException("Failed to exchange authorization code with Google");
         }
 
+        log.debug("Received Google access token response");
         return accessToken;
     }
 
     private Map<String, Object> fetchGoogleUserInfo(String accessToken) {
+        log.debug("Fetching Google user info");
         Map<String, Object> userInfo = googleRestClient.get()
                 .uri(googleProperties.userinfoUri())
                 .header("Authorization", "Bearer " + accessToken)
@@ -143,6 +151,7 @@ public class AuthService {
             throw new InvalidTokenException("Failed to fetch user info from Google");
         }
 
+        log.debug("Fetched Google user info");
         return userInfo;
     }
 
@@ -154,18 +163,18 @@ public class AuthService {
         try {
             return userService.findOrCreateFromGoogle(userInfo);
         } catch (DataIntegrityViolationException ex) {
-            log.warn("Concurrent user creation detected for googleId={}, retrying", userInfo.get("sub"));
+            log.warn("Concurrent user creation detected during Google authentication, retrying");
             try {
                 return userService.findOrCreateFromGoogle(userInfo);
             } catch (DataIntegrityViolationException retryEx) {
-                log.error("User creation failed after retry — possible duplicate constraint violation");
+                log.error("User creation failed after retry; possible duplicate constraint violation");
                 throw new InvalidTokenException("Failed to resolve user account", retryEx);
             }
         }
     }
 
     private AuthResponse buildAuthResponse(User user) {
-        log.info("User authenticated via Google: id={} email={}", user.getId(), user.getEmail());
+        log.info("User authenticated via Google");
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new AuthResponse(accessToken, userService.toResponse(user), refreshToken);

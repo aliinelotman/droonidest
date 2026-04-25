@@ -2,7 +2,6 @@ package com.app.backend.controller;
 
 import com.app.backend.dto.request.GoogleAuthRequest;
 import com.app.backend.dto.response.AuthResponse;
-import com.app.backend.exception.InvalidTokenException;
 import com.app.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -35,6 +35,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Auth", description = "Google OAuth login, token refresh, and logout")
 public class AuthController {
 
@@ -60,6 +61,7 @@ public class AuthController {
     @SecurityRequirements
     @GetMapping("/google/authorize-url")
     public ResponseEntity<Map<String, String>> getGoogleAuthorizeUrl() {
+        log.debug("Generating Google authorize URL");
         return ResponseEntity.ok(Map.of("url", authService.buildGoogleAuthorizeUrl()));
     }
 
@@ -84,9 +86,10 @@ public class AuthController {
     public ResponseEntity<AuthResponse> authenticateWithGoogle(
             @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response) {
-
+        log.info("Handling Google authentication request");
         AuthResponse authResponse = authService.authenticateWithGoogle(request.code(), request.state());
         setRefreshTokenCookie(response, authResponse.refreshToken());
+        log.info("Google authentication succeeded");
         return ResponseEntity.ok(authResponse);
     }
 
@@ -106,13 +109,16 @@ public class AuthController {
     @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        log.debug("Handling refresh token request");
         Optional<String> refreshToken = extractRefreshTokenFromCookies(request);
         if (refreshToken.isEmpty()) {
+            log.debug("Refresh token request ignored because no refresh cookie was present");
             return ResponseEntity.noContent().build();
         }
 
         AuthResponse authResponse = authService.refreshAuth(refreshToken.get());
         setRefreshTokenCookie(response, authResponse.refreshToken());
+        log.info("Refresh token succeeded");
         return ResponseEntity.ok(authResponse);
     }
 
@@ -129,6 +135,7 @@ public class AuthController {
     @SecurityRequirements
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
+        log.info("Handling logout request");
         clearRefreshTokenCookie(response);
         return ResponseEntity.noContent().build();
     }

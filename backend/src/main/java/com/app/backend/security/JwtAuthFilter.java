@@ -55,7 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Claims claims = jwtService.parseToken(token);
 
         if (claims == null || !jwtService.isAccessToken(claims)) {
-            log.warn("Rejected token from {}: invalid or wrong token type", request.getRemoteAddr());
+            log.warn("Rejected token: invalid or wrong token type");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
             return;
         }
@@ -77,7 +77,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             Optional<User> maybeUser = userRepository.findById(userId);
             if (maybeUser.isEmpty()) {
-                log.warn("Rejected token from {}: user {} not found or deleted", request.getRemoteAddr(), userId);
+                log.warn("Rejected token: user not found or deleted");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
                 return;
             }

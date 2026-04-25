@@ -11,3 +11,12 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+logging:
+  file:
+    name: /app/logs/spring-boot.log
+  level:
+    root: INFO
+    com.app.backend: DEBUG
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

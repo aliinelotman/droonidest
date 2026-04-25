@@ -1,6 +1,7 @@
 package com.app.backend.config;
 
 import com.app.backend.security.JwtAuthFilter;
+import com.app.backend.security.RequestCorrelationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final RequestCorrelationFilter requestCorrelationFilter;
     private final JwtAuthFilter jwtAuthFilter;
     private final CorsProperties corsProperties;
 
@@ -46,7 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/manage/**").hasAnyRole("ADMIN", "CONTENT_MANAGER")
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(requestCorrelationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthFilter, RequestCorrelationFilter.class)
                 .build();
     }
 
@@ -58,7 +61,8 @@ public class SecurityConfig {
                 .toList();
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", RequestCorrelationFilter.CORRELATION_ID_HEADER));
+        configuration.setExposedHeaders(List.of(RequestCorrelationFilter.CORRELATION_ID_HEADER));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

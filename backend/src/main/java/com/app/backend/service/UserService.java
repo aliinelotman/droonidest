@@ -6,6 +6,8 @@ import com.app.backend.exception.ResourceNotFoundException;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import java.util.UUID;
 /**
  * Manages user lookup and creation operations.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,8 +46,12 @@ public class UserService {
 
         GoogleProfile profile = new GoogleProfile(googleId, email, displayName, avatarUrl, emailVerified);
 
+        log.info("Processing Google user profile: googleId={}, email={}", googleId, email);
         return userRepository.findByGoogleId(googleId)
-                .map(existingUser -> updateExistingUser(existingUser, profile))
+                .map(existingUser -> {
+                    log.info("Updating existing user id={} for googleId={}", existingUser.getId(), googleId);
+                    return updateExistingUser(existingUser, profile);
+                })
                 .orElseGet(() -> createNewUser(profile));
     }
 
@@ -52,6 +59,7 @@ public class UserService {
      * Loads a user by ID. Soft-deleted users are excluded by {@code @SQLRestriction}.
      */
     public User findById(UUID id) {
+        log.debug("Looking up user id={}", id);
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
@@ -77,9 +85,12 @@ public class UserService {
     }
 
     private User createNewUser(GoogleProfile profile) {
+        log.info("Creating new user for googleId={} email={}", profile.googleId(), profile.email());
         User user = new User(profile.googleId(), profile.email(), profile.displayName());
         user.setAvatarUrl(profile.avatarUrl());
         user.setEmailVerified(profile.emailVerified());
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        log.info("Created new user id={} for googleId={}", savedUser.getId(), profile.googleId());
+        return savedUser;
     }
 }
