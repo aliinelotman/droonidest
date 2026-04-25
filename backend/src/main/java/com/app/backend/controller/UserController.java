@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,15 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Users", description = "Authenticated user profile endpoints")
 public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Returns the profile of the currently authenticated user.
-     */
     @Operation(
             summary = "Get current user",
             description = "Returns the profile of the currently authenticated user.",
@@ -42,9 +37,6 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User currentUser) {
-        log.debug("Fetching current user profile for userId={}", currentUser.getId());
-        UserResponse response = userService.toResponse(currentUser);
-        log.debug("Returning current user profile for userId={}", currentUser.getId());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.toResponse(currentUser));
     }
 }

@@ -34,14 +34,14 @@ public class ManageModuleService {
      */
     @Transactional
     public ModuleResponse create(CreateModuleRequest request) {
-        log.info("Creating module title={}", request.getTitle());
         int nextSortOrder = (int) moduleRepository.count();
         Module module = new Module(request.getTitle(), nextSortOrder);
         module.setDescription(request.getDescription());
         module.setThumbnailUrl(request.getThumbnailUrl());
         module.setIfFreePreview(request.isIfFreePreview());
         ModuleResponse response = ModuleResponse.from(moduleRepository.save(module));
-        log.info("Created module id={} sortOrder={}", response.getId(), response.getSortOrder());
+        log.info("Created module id={} status={} sortOrder={}",
+                response.getId(), response.getStatus(), response.getSortOrder());
         return response;
     }
 
@@ -49,12 +49,10 @@ public class ManageModuleService {
      * Returns all modules regardless of status, ordered by sort order.
      */
     public List<ModuleResponse> getAll() {
-        List<ModuleResponse> modules = moduleRepository.findAllByOrderBySortOrder()
+        return moduleRepository.findAllByOrderBySortOrder()
                 .stream()
                 .map(ModuleResponse::from)
                 .toList();
-        log.debug("Loaded {} managed modules", modules.size());
-        return modules;
     }
 
     /**
@@ -63,7 +61,6 @@ public class ManageModuleService {
      * @throws ResourceNotFoundException if the module does not exist
      */
     public ModuleDetailResponse getById(UUID id) {
-        log.debug("Loading managed module id={}", id);
         Module module = moduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", id));
 
@@ -72,9 +69,7 @@ public class ManageModuleService {
                 .map(ml -> new LessonSummary(ml.getLesson().getId(), ml.getLesson().getTitle()))
                 .toList();
 
-        ModuleDetailResponse response = toDetailResponse(module, lessons);
-        log.debug("Loaded managed module id={} with {} lessons", id, lessons.size());
-        return response;
+        return toDetailResponse(module, lessons);
     }
 
     /**
@@ -84,7 +79,6 @@ public class ManageModuleService {
      */
     @Transactional
     public ModuleResponse update(UUID id, UpdateModuleRequest request) {
-        log.info("Updating module id={} title={} status={}", id, request.getTitle(), request.getStatus());
         Module module = moduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", id));
 
@@ -106,7 +100,6 @@ public class ManageModuleService {
      */
     @Transactional
     public void delete(UUID id) {
-        log.info("Deleting module id={}", id);
         if (!moduleRepository.existsById(id)) {
             throw new ResourceNotFoundException("Module", id);
         }

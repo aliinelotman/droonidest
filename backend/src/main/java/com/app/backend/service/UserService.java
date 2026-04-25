@@ -46,10 +46,9 @@ public class UserService {
 
         GoogleProfile profile = new GoogleProfile(googleId, email, displayName, avatarUrl, emailVerified);
 
-        log.info("Processing Google user profile: googleId={}, email={}", googleId, email);
         return userRepository.findByGoogleId(googleId)
                 .map(existingUser -> {
-                    log.info("Updating existing user id={} for googleId={}", existingUser.getId(), googleId);
+                    log.debug("Updating existing user from Google profile");
                     return updateExistingUser(existingUser, profile);
                 })
                 .orElseGet(() -> createNewUser(profile));
@@ -59,7 +58,6 @@ public class UserService {
      * Loads a user by ID. Soft-deleted users are excluded by {@code @SQLRestriction}.
      */
     public User findById(UUID id) {
-        log.debug("Looking up user id={}", id);
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
@@ -85,12 +83,11 @@ public class UserService {
     }
 
     private User createNewUser(GoogleProfile profile) {
-        log.info("Creating new user for googleId={} email={}", profile.googleId(), profile.email());
         User user = new User(profile.googleId(), profile.email(), profile.displayName());
         user.setAvatarUrl(profile.avatarUrl());
         user.setEmailVerified(profile.emailVerified());
         User savedUser = userRepository.save(user);
-        log.info("Created new user id={} for googleId={}", savedUser.getId(), profile.googleId());
+        log.info("Created new user from Google profile");
         return savedUser;
     }
 }

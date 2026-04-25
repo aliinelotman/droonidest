@@ -39,7 +39,6 @@ public class ManageLessonService {
      */
     @Transactional
     public LessonResponse create(UUID moduleId, CreateLessonRequest request) {
-        log.info("Creating lesson in moduleId={} title={}", moduleId, request.getTitle());
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", moduleId));
 
@@ -55,7 +54,8 @@ public class ManageLessonService {
         moduleLessonRepository.save(link);
 
         LessonResponse response = toResponse(lesson, moduleId);
-        log.info("Created lesson id={} in moduleId={} sortOrder={}", response.getId(), moduleId, nextSortOrder);
+        log.info("Created lesson id={} moduleId={} status={} sortOrder={}",
+                response.getId(), moduleId, response.getStatus(), nextSortOrder);
         return response;
     }
 
@@ -65,16 +65,13 @@ public class ManageLessonService {
      * @throws ResourceNotFoundException if the lesson does not exist
      */
     public LessonResponse getById(UUID id) {
-        log.debug("Loading managed lesson id={}", id);
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", id));
 
         List<ModuleLesson> links = moduleLessonRepository.findByLessonId(id);
         UUID moduleId = links.isEmpty() ? null : links.getFirst().getId().getModuleId();
 
-        LessonResponse response = toResponse(lesson, moduleId);
-        log.debug("Loaded managed lesson id={} moduleId={}", id, moduleId);
-        return response;
+        return toResponse(lesson, moduleId);
     }
 
     /**
@@ -84,7 +81,6 @@ public class ManageLessonService {
      */
     @Transactional
     public LessonResponse update(UUID id, UpdateLessonRequest request) {
-        log.info("Updating lesson id={} title={}", id, request.getTitle());
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", id));
 
@@ -110,7 +106,6 @@ public class ManageLessonService {
      */
     @Transactional
     public void delete(UUID id) {
-        log.info("Deleting lesson id={}", id);
         if (!lessonRepository.existsById(id)) {
             throw new ResourceNotFoundException("Lesson", id);
         }

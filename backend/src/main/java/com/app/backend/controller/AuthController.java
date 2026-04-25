@@ -34,8 +34,8 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Tag(name = "Auth", description = "Google OAuth login, token refresh, and logout")
 public class AuthController {
 
@@ -46,10 +46,6 @@ public class AuthController {
     @Value("${auth.cookie.secure:true}")
     private boolean secureCookie;
 
-    /**
-     * Returns the Google OAuth 2.0 authorization URL the frontend should open to
-     * initiate login. Keeps the Google client ID on the backend.
-     */
     @Operation(
             summary = "Get Google OAuth authorize URL",
             description = "Returns the Google OAuth 2.0 authorization URL the frontend should open " +
@@ -61,15 +57,9 @@ public class AuthController {
     @SecurityRequirements
     @GetMapping("/google/authorize-url")
     public ResponseEntity<Map<String, String>> getGoogleAuthorizeUrl() {
-        log.debug("Generating Google authorize URL");
         return ResponseEntity.ok(Map.of("url", authService.buildGoogleAuthorizeUrl()));
     }
 
-    /**
-     * Exchanges a Google authorization code for JWT tokens.
-     * Access token and user profile are returned in the response body.
-     * Refresh token is set as an httpOnly cookie.
-     */
     @Operation(
             summary = "Google OAuth login",
             description = "Exchanges a Google authorization code for JWT tokens. " +
@@ -86,16 +76,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> authenticateWithGoogle(
             @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response) {
-        log.info("Handling Google authentication request");
         AuthResponse authResponse = authService.authenticateWithGoogle(request.code(), request.state());
         setRefreshTokenCookie(response, authResponse.refreshToken());
-        log.info("Google authentication succeeded");
         return ResponseEntity.ok(authResponse);
     }
 
-    /**
-     * Refreshes the access token using the refresh token from the httpOnly cookie.
-     */
     @Operation(
             summary = "Refresh access token",
             description = "Issues a new access token using the refresh token from the httpOnly cookie. " +
@@ -109,22 +94,17 @@ public class AuthController {
     @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        log.debug("Handling refresh token request");
         Optional<String> refreshToken = extractRefreshTokenFromCookies(request);
         if (refreshToken.isEmpty()) {
-            log.debug("Refresh token request ignored because no refresh cookie was present");
+            log.info("Authentication refresh skipped: no refresh token cookie");
             return ResponseEntity.noContent().build();
         }
 
         AuthResponse authResponse = authService.refreshAuth(refreshToken.get());
         setRefreshTokenCookie(response, authResponse.refreshToken());
-        log.info("Refresh token succeeded");
         return ResponseEntity.ok(authResponse);
     }
 
-    /**
-     * Clears the refresh token cookie, effectively logging the user out.
-     */
     @Operation(
             summary = "Logout",
             description = "Clears the refresh token cookie, ending the user session.",
@@ -135,7 +115,7 @@ public class AuthController {
     @SecurityRequirements
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        log.info("Handling logout request");
+        log.info("Authentication logout requested; clearing refresh token cookie");
         clearRefreshTokenCookie(response);
         return ResponseEntity.noContent().build();
     }

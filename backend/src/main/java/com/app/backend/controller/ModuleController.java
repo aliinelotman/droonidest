@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +23,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/modules")
 @RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Modules", description = "Course module and lesson browsing (public)")
 public class ModuleController {
 
@@ -39,10 +37,7 @@ public class ModuleController {
     @SecurityRequirements
     @GetMapping
     public List<ModuleResponse> getAllModules() {
-        log.debug("Listing published modules");
-        List<ModuleResponse> modules = moduleService.getAll();
-        log.debug("Returning {} published modules", modules.size());
-        return modules;
+        return moduleService.getAll();
     }
 
     @Operation(
@@ -56,10 +51,7 @@ public class ModuleController {
     @SecurityRequirements
     @GetMapping("/{id}")
     public ModuleResponse getModule(@PathVariable UUID id) {
-        log.debug("Fetching published module id={}", id);
-        ModuleResponse module = moduleService.getById(id);
-        log.debug("Returning published module id={}", id);
-        return module;
+        return moduleService.getById(id);
     }
 
     @Operation(
@@ -73,9 +65,6 @@ public class ModuleController {
     @SecurityRequirements
     @GetMapping("/{moduleId}/lessons")
     public List<LessonResponse> getLessonsByModule(@PathVariable UUID moduleId) {
-        log.debug("Listing published lessons for moduleId={}", moduleId);
-        List<LessonResponse> lessons = lessonService.getByModuleId(moduleId);
-        log.debug("Returning {} published lessons for moduleId={}", lessons.size(), moduleId);
-        return lessons;
+        return lessonService.getByModuleId(moduleId);
     }
 }

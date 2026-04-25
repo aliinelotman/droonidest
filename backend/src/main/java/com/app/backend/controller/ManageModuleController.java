@@ -13,11 +13,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,16 +36,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/manage/modules")
 @RequiredArgsConstructor
-@Slf4j
 @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
 @Tag(name = "Manage Modules", description = "Content management endpoints for modules")
 public class ManageModuleController {
 
     private final ManageModuleService manageModuleService;
 
-    /**
-     * Creates a new module with auto-assigned sort order.
-     */
     @Operation(
             summary = "Create a new module",
             responses = @ApiResponse(responseCode = "201", description = "Module created",
@@ -47,15 +50,9 @@ public class ManageModuleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ModuleResponse createModule(@Valid @RequestBody CreateModuleRequest request) {
-        log.info("Creating module title={}", request.getTitle());
-        ModuleResponse module = manageModuleService.create(request);
-        log.info("Created module id={} title={}", module.getId(), module.getTitle());
-        return module;
+        return manageModuleService.create(request);
     }
 
-    /**
-     * Returns all modules regardless of status, ordered by sort order.
-     */
     @Operation(
             summary = "List all modules (all statuses)",
             responses = @ApiResponse(responseCode = "200", description = "Module list returned",
@@ -63,15 +60,9 @@ public class ManageModuleController {
     )
     @GetMapping
     public List<ModuleResponse> getAllModules() {
-        log.debug("Listing all managed modules");
-        List<ModuleResponse> modules = manageModuleService.getAll();
-        log.debug("Returning {} managed modules", modules.size());
-        return modules;
+        return manageModuleService.getAll();
     }
 
-    /**
-     * Returns a single module with its nested lesson summaries.
-     */
     @Operation(
             summary = "Get module by ID with lesson summaries",
             responses = {
@@ -82,15 +73,9 @@ public class ManageModuleController {
     )
     @GetMapping("/{id}")
     public ModuleDetailResponse getModule(@PathVariable UUID id) {
-        log.debug("Fetching managed module id={}", id);
-        ModuleDetailResponse module = manageModuleService.getById(id);
-        log.debug("Returning managed module id={}", id);
-        return module;
+        return manageModuleService.getById(id);
     }
 
-    /**
-     * Updates all module fields including status.
-     */
     @Operation(
             summary = "Update module fields including status",
             responses = {
@@ -101,15 +86,9 @@ public class ManageModuleController {
     )
     @PutMapping("/{id}")
     public ModuleResponse updateModule(@PathVariable UUID id, @Valid @RequestBody UpdateModuleRequest request) {
-        log.info("Updating module id={} title={} status={}", id, request.getTitle(), request.getStatus());
-        ModuleResponse module = manageModuleService.update(id, request);
-        log.info("Updated module id={} status={}", module.getId(), module.getStatus());
-        return module;
+        return manageModuleService.update(id, request);
     }
 
-    /**
-     * Deletes a module and its module–lesson associations.
-     */
     @Operation(
             summary = "Delete a module",
             responses = {
@@ -119,9 +98,7 @@ public class ManageModuleController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
-        log.info("Deleting module id={}", id);
         manageModuleService.delete(id);
-        log.info("Deleted module id={}", id);
         return ResponseEntity.noContent().build();
     }
 }

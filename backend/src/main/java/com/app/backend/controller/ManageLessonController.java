@@ -11,11 +11,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -26,16 +33,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/manage")
 @RequiredArgsConstructor
-@Slf4j
 @PreAuthorize("hasAnyRole('ADMIN', 'CONTENT_MANAGER')")
 @Tag(name = "Manage Lessons", description = "Content management endpoints for lessons")
 public class ManageLessonController {
 
     private final ManageLessonService manageLessonService;
 
-    /**
-     * Creates a new lesson and links it to the specified module with auto-assigned sort order.
-     */
     @Operation(
             summary = "Create a new lesson in a module",
             responses = {
@@ -47,15 +50,9 @@ public class ManageLessonController {
     @PostMapping("/modules/{moduleId}/lessons")
     @ResponseStatus(HttpStatus.CREATED)
     public LessonResponse createLesson(@PathVariable UUID moduleId, @Valid @RequestBody CreateLessonRequest request) {
-        log.info("Creating lesson in moduleId={} title={}", moduleId, request.getTitle());
-        LessonResponse lesson = manageLessonService.create(moduleId, request);
-        log.info("Created lesson id={} in moduleId={}", lesson.getId(), moduleId);
-        return lesson;
+        return manageLessonService.create(moduleId, request);
     }
 
-    /**
-     * Returns a single lesson with full content.
-     */
     @Operation(
             summary = "Get lesson by ID (full content)",
             responses = {
@@ -66,15 +63,9 @@ public class ManageLessonController {
     )
     @GetMapping("/lessons/{id}")
     public LessonResponse getLesson(@PathVariable UUID id) {
-        log.debug("Fetching managed lesson id={}", id);
-        LessonResponse lesson = manageLessonService.getById(id);
-        log.debug("Returning managed lesson id={}", id);
-        return lesson;
+        return manageLessonService.getById(id);
     }
 
-    /**
-     * Updates all mutable lesson fields.
-     */
     @Operation(
             summary = "Update lesson fields",
             responses = {
@@ -85,15 +76,9 @@ public class ManageLessonController {
     )
     @PutMapping("/lessons/{id}")
     public LessonResponse updateLesson(@PathVariable UUID id, @Valid @RequestBody UpdateLessonRequest request) {
-        log.info("Updating lesson id={} title={}", id, request.getTitle());
-        LessonResponse lesson = manageLessonService.update(id, request);
-        log.info("Updated lesson id={} status={}", lesson.getId(), lesson.getStatus());
-        return lesson;
+        return manageLessonService.update(id, request);
     }
 
-    /**
-     * Deletes a lesson and its module–lesson associations.
-     */
     @Operation(
             summary = "Delete a lesson",
             responses = {
@@ -103,9 +88,7 @@ public class ManageLessonController {
     )
     @DeleteMapping("/lessons/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable UUID id) {
-        log.info("Deleting lesson id={}", id);
         manageLessonService.delete(id);
-        log.info("Deleted lesson id={}", id);
         return ResponseEntity.noContent().build();
     }
 }

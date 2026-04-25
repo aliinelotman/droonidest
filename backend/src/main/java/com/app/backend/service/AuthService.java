@@ -91,7 +91,7 @@ public class AuthService {
         User user = userService.findById(userId);
         String accessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
-        log.info("Refreshed authentication");
+        log.info("Refreshed authentication userId={}", userId);
         return new AuthResponse(accessToken, userService.toResponse(user), newRefreshToken);
     }
 
@@ -174,7 +174,7 @@ public class AuthService {
     }
 
     private AuthResponse buildAuthResponse(User user) {
-        log.info("User authenticated via Google");
+        log.info("User authenticated via Google userId={} role={}", user.getId(), user.getRole());
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new AuthResponse(accessToken, userService.toResponse(user), refreshToken);

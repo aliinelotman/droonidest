@@ -1,14 +1,13 @@
 package com.app.backend.service;
 
 import com.app.backend.dto.response.LessonResponse;
+import com.app.backend.exception.ResourceNotFoundException;
 import com.app.backend.model.Lesson;
 import com.app.backend.model.ModuleLesson;
 import com.app.backend.model.enums.ContentStatus;
-import com.app.backend.exception.ResourceNotFoundException;
 import com.app.backend.repository.ModuleLessonRepository;
 import com.app.backend.repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class LessonService {
 
@@ -25,16 +23,13 @@ public class LessonService {
     private final ModuleRepository moduleRepository;
 
     public List<LessonResponse> getByModuleId(UUID moduleId) {
-        log.debug("Loading published lessons for moduleId={}", moduleId);
         moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Module", moduleId));
 
-        List<LessonResponse> lessons = moduleLessonRepository.findByModuleIdAndLessonStatus(moduleId, ContentStatus.PUBLISHED)
+        return moduleLessonRepository.findByModuleIdAndLessonStatus(moduleId, ContentStatus.PUBLISHED)
                 .stream()
                 .map(this::toResponse)
                 .toList();
-        log.debug("Loaded {} published lessons for moduleId={}", lessons.size(), moduleId);
-        return lessons;
     }
 
     private LessonResponse toResponse(ModuleLesson ml) {

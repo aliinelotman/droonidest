@@ -19,4 +19,4 @@ logging:
     root: INFO
     com.app.backend: DEBUG
   pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${spring.application.name:backend},trace=%X{traceId},span=%X{spanId},corr=%X{correlationId}] --- [%t] %logger{36} : %msg%n"
