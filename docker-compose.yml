@@ -56,8 +56,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    volumes:
-      - backend_logs:/app/logs
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/liveness || exit 1"]
       interval: 10s
@@ -120,7 +118,7 @@ services:
     image: grafana/promtail:latest
     volumes:
       - ./observability/promtail-config.yaml:/etc/promtail/config.yml
-      - backend_logs:/var/log/spring-boot
+      - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
@@ -152,6 +150,5 @@ volumes:
   postgres_data:
   minio_data:
   loki_data:
-  backend_logs:
   prometheus_data:
   grafana_data:

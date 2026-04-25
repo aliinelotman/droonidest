@@ -1,7 +1,3 @@
-spring:
-  jpa:
-    show-sql: true
-
 auth:
   cookie:
     secure: false
@@ -13,10 +9,9 @@ springdoc:
     enabled: true
 
 logging:
-  file:
-    name: /app/logs/spring-boot.log
   level:
     root: INFO
     com.app.backend: DEBUG
+    org.hibernate.SQL: DEBUG
   pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${spring.application.name:backend},trace=%X{traceId},span=%X{spanId},corr=%X{correlationId}] --- [%t] %logger{36} : %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${spring.application.name:backend},corr=%X{correlationId}] --- [%t] %logger{36} : %msg%n"
