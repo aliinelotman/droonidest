@@ -1,0 +1,33 @@
+groups:
+  - name: droonidest-backend-alerts
+    interval: 30s
+    rules:
+      - alert: BackendDown
+        expr: up{job="spring-boot"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Backend target is down"
+          description: "Prometheus cannot scrape spring-boot metrics for at least 2 minutes."
+
+      - alert: High5xxRate
+        expr: sum(rate(http_server_requests_seconds_count{job="spring-boot",status=~"5.."}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{job="spring-boot"}[5m])), 0.001) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High 5xx ratio"
+          description: "5xx responses are above 5% over the last 10 minutes."
+
+      - alert: HighP95Latency
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job="spring-boot"}[5m]))) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High request latency"
+          description: "p95 latency is above 1.5 seconds for at least 10 minutes."

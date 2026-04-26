@@ -104,7 +104,7 @@ services:
       retries: 5
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.1
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -115,16 +115,17 @@ services:
       - backend
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.6.8
     volumes:
       - ./observability/promtail-config.yaml:/etc/promtail/config.yml
       - /var/run/docker.sock:/var/run/docker.sock
+      - promtail_data:/var/lib/promtail
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.11.2
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -134,7 +135,7 @@ services:
       - backend
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.0.1
     ports:
       - "3000:3000"
     environment:
@@ -152,3 +153,4 @@ volumes:
   loki_data:
   prometheus_data:
   grafana_data:
+  promtail_data:
