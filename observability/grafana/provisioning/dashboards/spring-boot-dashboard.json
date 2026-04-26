@@ -544,13 +544,13 @@
       },
       "targets": [
         {
-          "expr": "jvm_memory_used_bytes{job=\"spring-boot\",area=\"heap\"}",
-          "legendFormat": "heap used",
+          "expr": "sum by (instance) (jvm_memory_used_bytes{job=\"spring-boot\",area=\"heap\"})",
+          "legendFormat": "{{instance}} used",
           "refId": "A"
         },
         {
-          "expr": "jvm_memory_max_bytes{job=\"spring-boot\",area=\"heap\"}",
-          "legendFormat": "heap max",
+          "expr": "sum by (instance) (jvm_memory_max_bytes{job=\"spring-boot\",area=\"heap\"})",
+          "legendFormat": "{{instance}} max",
           "refId": "B"
         }
       ],
@@ -926,7 +926,10 @@
       "type": "table"
     },
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -946,15 +949,25 @@
       },
       "targets": [
         {
-          "expr": "{job=\"spring-boot\",compose_service=\"backend\"} |= \"ERROR\"",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "code",
+          "expr": "{job=\"spring-boot\",compose_service=\"backend\"} |~ \"(\\\\bINFO\\\\b|\\\\[INFO\\\\])\" !~ \"Request completed\"",
+          "maxLines": 500,
+          "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Error Logs",
+      "title": "Application Info Logs",
       "type": "logs"
     },
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -974,11 +987,56 @@
       },
       "targets": [
         {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "code",
           "expr": "{job=\"spring-boot\",compose_service=\"backend\"} |= \"Request completed\"",
+          "maxLines": 500,
+          "queryType": "range",
           "refId": "A"
         }
       ],
       "title": "Recent Request Completions",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 17,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "code",
+          "expr": "{job=\"spring-boot\",compose_service=\"backend\"} |~ \"(\\\\bWARN\\\\b|\\\\bERROR\\\\b|\\\\[WARN\\\\]|\\\\[ERROR\\\\])\"",
+          "maxLines": 500,
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Warning and Error Logs",
       "type": "logs"
     }
   ],
@@ -1000,6 +1058,6 @@
   "timezone": "browser",
   "title": "DrooniDest System Overview",
   "uid": "droonidest-overview",
-  "version": 1,
+  "version": 7,
   "weekStart": ""
 }

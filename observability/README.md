@@ -40,7 +40,7 @@ The provisioned dashboard focuses on the backend health and request flow:
 - JVM heap, CPU, threads, and database connection pressure
 - Top endpoints by traffic
 - Slowest endpoints by p95 latency
-- Error logs and recent request completion logs
+- Application logs (INFO/WARN/ERROR) and recent request completion logs
 
 This is a strong backend overview, but it is not yet a full infrastructure dashboard because Postgres, MinIO, and frontend-specific exporters are not configured in Prometheus.
 
@@ -49,7 +49,7 @@ This is a strong backend overview, but it is not yet a full infrastructure dashb
 In Grafana Explore with the `Loki` datasource:
 
 - `{job="spring-boot"}` for all backend logs
-- `{job="spring-boot",compose_service="backend"} |= "ERROR"` for error logs
+- `{job="spring-boot",compose_service="backend"} |~ "\\b(INFO|WARN|ERROR)\\b"` for application logs by level
 - `{job="spring-boot",compose_service="backend"} |= "Request completed"` for request completion logs
 - `{job="spring-boot"} |= "corr="` to inspect correlation IDs in log lines
 

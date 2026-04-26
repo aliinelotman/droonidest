@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * Ensures each request has a correlation ID available in logs and response headers.
@@ -25,6 +28,8 @@ public class RequestCorrelationFilter extends OncePerRequestFilter {
 
     public static final String CORRELATION_ID_KEY = "correlationId";
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    private static final Pattern CORRELATION_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$");
+    private static final int RANDOM_SUFFIX_LENGTH = 10;
 
     @Override
     protected void doFilterInternal(
@@ -56,15 +61,25 @@ public class RequestCorrelationFilter extends OncePerRequestFilter {
     private String resolveCorrelationId(HttpServletRequest request) {
         String headerValue = request.getHeader(CORRELATION_ID_HEADER);
         if (headerValue == null) {
-            return UUID.randomUUID().toString();
+            return corralationId();
         }
 
         String correlationId = headerValue.trim();
-        if (correlationId.isEmpty() || correlationId.length() > 128) {
-            return UUID.randomUUID().toString();
+        if (!CORRELATION_ID_PATTERN.matcher(correlationId).matches()) {
+            return corralationId();
         }
 
         return correlationId;
+    }
+
+    private String corralationId() {
+        String timestampPart = Long.toString(Instant.now().toEpochMilli(), 36).toUpperCase(Locale.ROOT);
+        String randomPart = UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, RANDOM_SUFFIX_LENGTH)
+                .toUpperCase(Locale.ROOT);
+        return "c-" + timestampPart + "-" + randomPart;
     }
 
     private void logRequestCompletion(HttpServletRequest request, HttpServletResponse response, long startNanos) {
