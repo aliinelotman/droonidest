@@ -1,0 +1,108 @@
+<div class="assembly">
+  <h2 class="assembly__title">Koosta FPV droon</h2>
+  <p class="assembly__subtitle">Lohista osad õigetesse kohtadesse droonil</p>
+
+  <div class="assembly__workspace">
+    <!-- Parts panel -->
+    <div class="assembly__panel">
+      <h3 class="assembly__panel-heading">Osad</h3>
+      <div
+        cdkDropList
+        id="parts-panel"
+        [cdkDropListData]="partsPanel"
+        [cdkDropListConnectedTo]="allDropListIds"
+        (cdkDropListDropped)="onDrop($event)"
+        class="assembly__parts-list"
+      >
+        @for (part of partsPanel; track part.id) {
+          <div cdkDrag [cdkDragData]="part" class="assembly__part-card">
+            <span class="assembly__part-icon" [innerHTML]="getPartIcon(part.id)"></span>
+            <span class="assembly__part-name">{{ part.name }}</span>
+            @if (part.quantity > 1) {
+              <span class="assembly__part-badge">×{{ part.remaining }}</span>
+            }
+            <div *cdkDragPlaceholder class="assembly__drag-placeholder"></div>
+          </div>
+        }
+        @if (allPlaced) {
+          <p class="assembly__panel-empty">Kõik osad on paigaldatud!</p>
+        }
+      </div>
+    </div>
+
+    <!-- Drone diagram -->
+    <div class="assembly__diagram">
+      <div class="assembly__drone-container">
+        <!-- SVG drone frame background -->
+        <svg
+          class="assembly__drone-svg"
+          viewBox="0 0 500 500"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- Arms -->
+          <line x1="250" y1="250" x2="105" y2="105" stroke="rgba(255,255,255,0.15)" stroke-width="6" stroke-linecap="round" />
+          <line x1="250" y1="250" x2="395" y2="105" stroke="rgba(255,255,255,0.15)" stroke-width="6" stroke-linecap="round" />
+          <line x1="250" y1="250" x2="105" y2="395" stroke="rgba(255,255,255,0.15)" stroke-width="6" stroke-linecap="round" />
+          <line x1="250" y1="250" x2="395" y2="395" stroke="rgba(255,255,255,0.15)" stroke-width="6" stroke-linecap="round" />
+
+          <!-- Center body -->
+          <rect x="200" y="200" width="100" height="100" rx="10" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2" />
+
+          <!-- Motor mounts -->
+          <circle cx="105" cy="105" r="30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+          <circle cx="395" cy="105" r="30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+          <circle cx="105" cy="395" r="30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+          <circle cx="395" cy="395" r="30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+
+          <!-- Propeller arcs -->
+          <circle cx="105" cy="105" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="6 4" />
+          <circle cx="395" cy="105" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="6 4" />
+          <circle cx="105" cy="395" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="6 4" />
+          <circle cx="395" cy="395" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="6 4" />
+
+        </svg>
+
+        <!-- Drop zones -->
+        @for (zone of dropZones; track zone.id) {
+          <div
+            [class]="zoneClasses(zone)"
+            cdkDropList
+            [cdkDropListDisabled]="zone.parts.length > 0"
+            [id]="zone.id"
+            [cdkDropListData]="zone.parts"
+            [cdkDropListConnectedTo]="allDropListIds"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            @if (zone.parts.length > 0) {
+              <div class="assembly__zone-part">
+                <span class="assembly__zone-icon" [innerHTML]="getPartIcon(zone.partId)"></span>
+                <div class="assembly__tooltip">
+                  <strong>{{ zone.parts[0].name }}</strong>
+                  <p>{{ zone.parts[0].description }}</p>
+                </div>
+              </div>
+            } @else {
+              <span class="assembly__zone-hint" [innerHTML]="getPartIcon(zone.partId)"></span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset button + completion message -->
+  <div class="assembly__actions">
+    @if (allPlaced) {
+      <p class="assembly__feedback">
+        Suurepärane! Sa koostasid drooni edukalt. Hõlju iga osa kohal, et lugeda lähemalt selle kohta.
+      </p>
+    }
+    <button class="assembly__btn" (click)="resetExercise()">
+      @if (allPlaced) {
+        Proovi uuesti
+      } @else {
+        Lähtesta
+      }
+    </button>
+  </div>
+</div>

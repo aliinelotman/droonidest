@@ -16,6 +16,7 @@ import { GalleryComponent } from '../../components/gallery/gallery.component';
 import { FunFactComponent } from '../../components/fun-fact/fun-fact.component';
 import { ClosingSectionComponent } from '../../components/closing-section/closing-section.component';
 import { QuizComponent } from '../../components/quiz/quiz.component';
+import { DroneAssemblyComponent } from '../../components/drone-assembly/drone-assembly.component';
 import {
   SectionNavComponent,
   NavSection,
@@ -35,6 +36,7 @@ import { AuthService } from '../../services/auth.service';
     FunFactComponent,
     ClosingSectionComponent,
     QuizComponent,
+    DroneAssemblyComponent,
     SectionNavComponent,
     ModuleCardComponent,
   ],
@@ -58,6 +60,7 @@ export class ModuleOneComponent implements AfterViewInit, OnDestroy {
     { id: 'gallery', label: 'Arsenal' },
     { id: 'operations', label: 'Operations' },
     { id: 'future', label: 'Future' },
+    { id: 'exercise', label: 'Harjutus' },
     { id: 'quiz', label: 'Quiz' },
   ];
 
