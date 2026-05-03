@@ -1,0 +1,464 @@
+@use 'sass:math';
+@use 'sass:list';
+
+// (left, top, width, height) in 500x500 grid for each drop zone suffix.
+$zone-positions: (
+  frame:        (180, 188, 140, 50),
+  fc:           (200, 244, 100, 30),
+  esc:          (200, 280, 100, 30),
+  motor-tl:     (70,   88,  70, 40),
+  motor-tr:     (360,  88,  70, 40),
+  motor-bl:     (70,  370,  70, 40),
+  motor-br:     (360, 370,  70, 40),
+  propeller-tl: (70,   40,  70, 40),
+  propeller-tr: (360,  40,  70, 40),
+  propeller-bl: (70,  418,  70, 40),
+  propeller-br: (360, 418,  70, 40),
+  camera:       (205, 130,  90, 38),
+  vtx:          (335, 322,  90, 36),
+  receiver:     (75,  322,  90, 36),
+  battery:      (200, 322, 100, 36),
+  antenna:      (215, 372,  70, 36),
+);
+
+.assembly {
+  max-width: 960px;
+  margin: 0 auto;
+
+  &__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+  }
+
+  &__workspace {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  // ── Parts panel ──
+
+  &__panel {
+    position: sticky;
+    top: 80px;
+  }
+
+  &__panel-heading {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  &__parts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 60px;
+    padding: 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    transition: border-color 0.2s ease;
+
+    &.cdk-drop-list-dragging {
+      border-color: var(--color-accent);
+    }
+  }
+
+  &__panel-empty {
+    text-align: center;
+    color: #2ecc71;
+    font-size: 0.85rem;
+    padding: 12px 6px;
+    font-weight: 600;
+  }
+
+  &__part-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 6px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    &:hover {
+      border-color: var(--color-accent);
+      background: rgba(240, 165, 0, 0.06);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__part-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__part-name {
+    flex: 1;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--color-text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  &__part-badge {
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    background: rgba(240, 165, 0, 0.12);
+    border: 1px solid rgba(240, 165, 0, 0.35);
+    border-radius: 999px;
+    padding: 1px 6px;
+    line-height: 1.2;
+  }
+
+  &__drag-placeholder {
+    background: rgba(240, 165, 0, 0.08);
+    border: 2px dashed var(--color-accent);
+    border-radius: 8px;
+    min-height: 36px;
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  // ── Drone diagram ──
+
+  &__diagram {
+    display: flex;
+    justify-content: center;
+  }
+
+  &__drone-container {
+    position: relative;
+    width: 500px;
+    height: 500px;
+  }
+
+  &__drone-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  // ── Drop zones ──
+
+  &__drop-zone {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    overflow: visible;
+    z-index: 1;
+
+    &.cdk-drop-list-receiving,
+    &.cdk-drop-list-dragging {
+      border-color: var(--color-accent-blue);
+      background: rgba(74, 144, 217, 0.08);
+      box-shadow: 0 0 16px rgba(74, 144, 217, 0.15);
+    }
+
+    @each $name, $coords in $zone-positions {
+      &--#{$name} {
+        left: #{list.nth($coords, 1)}px;
+        top: #{list.nth($coords, 2)}px;
+        width: #{list.nth($coords, 3)}px;
+        height: #{list.nth($coords, 4)}px;
+      }
+    }
+
+    &--filled {
+      border-style: solid;
+      border-color: rgba(240, 165, 0, 0.5);
+      background: rgba(240, 165, 0, 0.06);
+    }
+
+    &--correct {
+      border-style: solid;
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.14);
+      box-shadow: 0 0 14px rgba(46, 204, 113, 0.25);
+      z-index: 2;
+    }
+
+    &--wrong-flash {
+      border-style: solid !important;
+      border-color: var(--color-danger) !important;
+      background: rgba(214, 48, 49, 0.25) !important;
+      box-shadow: 0 0 18px rgba(214, 48, 49, 0.45) !important;
+      animation: assemblyShake 0.5s ease;
+    }
+  }
+
+  &__zone-hint {
+    width: 70%;
+    height: 70%;
+    max-width: 30px;
+    max-height: 30px;
+    color: var(--color-text-muted);
+    opacity: 0.22;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__zone-part {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    cursor: help;
+  }
+
+  &__zone-icon {
+    flex-shrink: 0;
+    width: 70%;
+    height: 70%;
+    max-width: 30px;
+    max-height: 30px;
+    color: #2ecc71;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // Hover tooltip on placed parts
+  &__tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    width: 240px;
+    padding: 10px 12px;
+    background: rgba(12, 15, 19, 0.97);
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+    z-index: 100;
+    text-align: left;
+
+    strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--color-text-light);
+      line-height: 1.45;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: var(--color-accent);
+    }
+  }
+
+  &__zone-part:hover .assembly__tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  // ── Actions & feedback ──
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  &__btn {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 36px;
+    border: 2px solid var(--color-accent);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: var(--color-accent);
+      color: var(--color-text-dark);
+    }
+  }
+
+  &__feedback {
+    text-align: center;
+    font-size: 1rem;
+    color: #2ecc71;
+    margin: 0;
+    line-height: 1.6;
+    animation: assemblyFadeIn 0.4s ease;
+  }
+}
+
+// CDK drag preview styling
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: rgba(12, 15, 19, 0.95);
+  border: 1px solid var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-text-light);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.82rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transform: scale(1.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@keyframes assemblyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes assemblyShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+// ── Responsive ──
+
+@media (max-width: 768px) {
+  .assembly {
+    &__workspace {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    &__panel {
+      position: static;
+    }
+
+    &__parts-list {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    &__part-card {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+    }
+
+    &__drone-container {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      aspect-ratio: 1;
+      margin: 0 auto;
+    }
+
+    &__drop-zone {
+      @each $name, $coords in $zone-positions {
+        &--#{$name} {
+          left: math.percentage(math.div(list.nth($coords, 1), 500));
+          top: math.percentage(math.div(list.nth($coords, 2), 500));
+          width: math.percentage(math.div(list.nth($coords, 3), 500));
+          height: math.percentage(math.div(list.nth($coords, 4), 500));
+        }
+      }
+    }
+
+    &__tooltip {
+      width: 200px;
+    }
+  }
+}
