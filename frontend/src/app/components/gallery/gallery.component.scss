@@ -49,29 +49,22 @@
     &-image {
       background: linear-gradient(135deg, var(--color-bg-alt), #0f1f33);
       aspect-ratio: 16 / 10;
-      display: flex;
-      align-items: flex-end;
-      padding: 12px;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
     }
 
-    &-type {
-      font-family: var(--font-display);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: rgba(0, 0, 0, 0.5);
-      padding: 4px 10px;
-      border-radius: 4px;
-    }
-
-    &-name {
-      font-family: var(--font-display);
-      font-size: 1.15rem;
-      font-weight: 600;
-      text-transform: uppercase;
+    &-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
       padding: 16px;
       color: var(--color-text-light);
+      margin: 0;
     }
   }
 }
@@ -91,7 +84,7 @@
     background: var(--color-bg-alt);
     border: 1px solid var(--color-card-border);
     border-radius: 16px;
-    max-width: 560px;
+    max-width: 720px;
     width: 100%;
     overflow: hidden;
     position: relative;
@@ -101,13 +94,19 @@
     position: absolute;
     top: 12px;
     right: 16px;
-    background: none;
+    background: rgba(0, 0, 0, 0.5);
     border: none;
     color: var(--color-text-light);
     font-size: 2rem;
     cursor: pointer;
     z-index: 1;
     line-height: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover { color: var(--color-accent); }
   }
@@ -115,36 +114,22 @@
   &__image {
     background: linear-gradient(135deg, #0f1f33, var(--color-bg-primary));
     aspect-ratio: 16 / 9;
-    display: flex;
-    align-items: flex-end;
-    padding: 16px;
-  }
+    overflow: hidden;
 
-  &__type {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--color-accent);
-    background: rgba(0, 0, 0, 0.5);
-    padding: 4px 12px;
-    border-radius: 4px;
-  }
-
-  &__name {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    padding: 20px 24px 8px;
-    color: var(--color-text-light);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
   }
 
   &__desc {
-    padding: 0 24px 24px;
-    font-size: 0.95rem;
-    color: var(--color-text-muted);
+    padding: 20px 24px 24px;
+    font-size: 1rem;
+    color: var(--color-text-light);
     line-height: 1.7;
+    margin: 0;
   }
 }
 

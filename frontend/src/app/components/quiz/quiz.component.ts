@@ -24,9 +24,9 @@ export class QuizComponent implements OnInit {
 
   private readonly fallbackQuestions: QuizQuestion[] = [
     {
-      question: 'What does "UCAV" stand for?',
+      question: 'Mida tähendab lühend „UCAV“?',
       options: [
-        'Unmanned Combat Aerial Vehicle',
+        'Unmanned Combat Aerial Vehicle (mehitamata lahinguõhusõiduk)',
         'Universal Command Aviation Unit',
         'Unified Control Air Vessel',
         'Unmanned Carrier Attack Vehicle',
@@ -34,7 +34,7 @@ export class QuizComponent implements OnInit {
       correctIndex: 0,
     },
     {
-      question: 'Which drone gained widespread fame during the 2020 Nagorno-Karabakh conflict?',
+      question: 'Milline droon sai laialdaselt tuntuks 2020. aasta Mägi-Karabahhi konflikti ajal?',
       options: [
         'MQ-9 Reaper',
         'Bayraktar TB2',
@@ -44,22 +44,22 @@ export class QuizComponent implements OnInit {
       correctIndex: 1,
     },
     {
-      question: 'What type of weapon is the Switchblade 600?',
+      question: 'Mis tüüpi relv on Switchblade 600?',
       options: [
-        'Cruise missile',
-        'Reconnaissance drone',
-        'Loitering munition',
-        'Strategic bomber UAV',
+        'Tiibrakett',
+        'Luuredroon',
+        'Hõljuv lahingumoon (loitering munition)',
+        'Strateegiline pommitaja-droon',
       ],
       correctIndex: 2,
     },
     {
-      question: 'What is a "loyal wingman" drone designed to do?',
+      question: 'Mille jaoks on mõeldud nn „loyal wingman“ droon?',
       options: [
-        'Replace human pilots entirely',
-        'Operate alongside manned fighter jets',
-        'Deliver humanitarian supplies',
-        'Conduct deep-sea surveillance',
+        'Asendada täielikult inimpiloodid',
+        'Tegutseda mehitatud hävituslennukite kõrval',
+        'Toimetada kohale humanitaarabi',
+        'Teostada süvamere seiret',
       ],
       correctIndex: 1,
     },

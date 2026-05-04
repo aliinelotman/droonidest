@@ -43,7 +43,7 @@
   &__visual {
     flex: 0 0 40%;
     position: sticky;
-    top: 60px;
+    top: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,9 +53,9 @@
 
   &__drone {
     width: 100%;
-    max-width: 380px;
+    max-width: 360px;
     height: auto;
-    filter: drop-shadow(0 0 40px rgba(74, 144, 217, 0.2));
+    filter: drop-shadow(0 0 40px rgba(74, 144, 217, 0.25));
     animation: drone-hover 4s ease-in-out infinite;
   }
 
@@ -119,13 +119,13 @@
 
 /* Rotor spin animation */
 .hero__rotor {
-  animation: rotor-spin 0.3s linear infinite;
+  animation: rotor-spin 0.35s linear infinite;
   transform-origin: center;
 
-  &--1 { transform-origin: 90px 100px; }
-  &--2 { transform-origin: 310px 100px; }
-  &--3 { transform-origin: 90px 200px; }
-  &--4 { transform-origin: 310px 200px; }
+  &--1 { transform-origin: 78px 82px; }
+  &--2 { transform-origin: 322px 82px; }
+  &--3 { transform-origin: 78px 278px; }
+  &--4 { transform-origin: 322px 278px; }
 }
 
 .hero__blink {
@@ -143,11 +143,11 @@
 }
 
 @keyframes rotor-spin {
-  0% { opacity: 0.5; rx: 50; ry: 12; }
-  25% { opacity: 0.3; rx: 48; ry: 8; }
-  50% { opacity: 0.5; rx: 50; ry: 12; }
-  75% { opacity: 0.3; rx: 52; ry: 8; }
-  100% { opacity: 0.5; rx: 50; ry: 12; }
+  0%   { opacity: 0.55; rx: 58; ry: 6; }
+  25%  { opacity: 0.3;  rx: 56; ry: 3; }
+  50%  { opacity: 0.55; rx: 58; ry: 6; }
+  75%  { opacity: 0.3;  rx: 60; ry: 3; }
+  100% { opacity: 0.55; rx: 58; ry: 6; }
 }
 
 @keyframes blink {

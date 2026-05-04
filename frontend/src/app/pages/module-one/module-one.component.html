@@ -7,37 +7,28 @@
     <app-hero-section />
   </div>
 
-  <!-- Info Cards -->
-  <section id="overview" class="section section--alt">
-    <div class="container">
-      <div class="fade-in info-cards-grid" #fadeTarget>
-        <app-info-card
-          title="Precision and Power"
-          body="Ründedroonid on mehitamata õhusõidukid (UAV – Unmanned Aerial Vehicle), mida kasutatakse sõjalistel eesmärkidel vaenlase sihtmärkide ründamiseks. Need võivad olla varustatud rakettide, pommide või muude relvasüsteemidega ning neid juhitakse eemalt operaatori poolt või need töötavad osaliselt autonoomselt. Ründedroonid võimaldavad sooritada täppisründeid ilma pilooti ohtu seadmata ning neid kasutatakse nii riiklike relvajõudude kui ka mitteriigiliste osalejate poolt üha sagedamini kaasaegsetes konfliktides."
-          accentColor="var(--color-accent)"
-        />
-        <app-info-card
-          title="Eyes in the Sky"
-          body="Ründedroonide peamisteks eelisteks peetakse nende kulutõhusust, paindlikkust ja võimet viibida õhus pikka aega. Tuntumad näited on Ameerika Ühendriikide MQ-9 Reaper ja Türgi Bayraktar TB2, mida on laialdaselt kasutatud Ukraina, Süüria ja Mägi-Karabahhi konfliktides. Samas tõstatavad ründedroonid tõsiseid eetilisi ja õiguslikke küsimusi seoses tsiviilohvrite, vastutuse ja rahvusvahelise humanitaarõiguse järgimisega. Droonitehnoloogia kiire areng on muutnud kaasaegse sõjapidamise olemust märkimisväärselt."
-          accentColor="var(--color-accent-blue)"
-        />
-        <app-info-card
-          title="Payloads: Tools of the Mission"
-          body="From Hellfire missiles and laser-guided bombs to electronic warfare pods, a drone's payload defines its role. Loitering munitions blur the line between reconnaissance and attack, becoming the weapon themselves upon impact."
-          accentColor="var(--color-danger)"
-        />
-      </div>
+  <!-- Narrative: Multirootordroonid ja FPV -->
+  <section id="overview" class="section">
+    <div class="fade-in container" #fadeTarget>
+      <app-narrative-section
+        heading="Multirootordroonid ja FPV"
+        body="Mitme tiivikuga väikesed droonid, mida kasutatakse palju ka hobideks ja igapäevatööks väljaspool sõjakonteksti, nö 'tavaline poedroon'. Kuidas teda ära tunda? Nagu droonifotograaf Kaupo Kalda kirjutab: 'Tavaline poedroon näeb välja nagu lendav kassipoeg, jalad laiali. Ta on umbes paberilehe suurune, tal on 4 käppa, 4 propellerit ja tihti seisatab, teeb pilti ja vahetab taas asukohta.'
+
+Rootorite arv võib sellisel droonil olla kolmest kaheksani, tavaliselt oleme harjunud nägema nelja rootoriga droone.
+
+Kui sellisele droonile lisada juurde kaamera, saab temast 'first person view' ehk FPV droon ning seda juhitakse kaamerast nähtava otsepildi abil, mida edastatakse raadiolainete teel droonipiloodile. Sõjalises kontekstis kasutatakse multirootor ja FPV droone näiteks luurel kas tava- või termokaamera pildi abil andmete kogumiseks. Samuti on Ukraina sõjas kasutusel ka poedroonidest ümber ehitatud või kohapeal valmistatud FPV droone, millele lisatakse väike lõhkekeha.
+
+Kuna rindel kasutavad mõlemad osapooled raadiolainete segajaid, on viimastel aastatel väikeseid FPV rünnakdroone hakatud juhtima fiiberoptiliste kaabite abil, mida droon lennates alaosas asuvast kassetist lahti kerib. Kaabli abil saadetakse piloodile videopilti ning piloodilt tagasi droonile sõidujuhiseid."
+        imageUrl="https://upload.wikimedia.org/wikipedia/commons/0/04/UA_military_FPV_drones_10.jpg"
+        imageAlt="Ukraina sõdur hoiab käes lõhkekehaga varustatud väikest FPV kvadrokopterit; taustal põllul on näha suitsu (Ukraina relvajõud, Wikimedia Commons)"
+      />
     </div>
   </section>
 
-  <!-- Narrative: Lock On -->
-  <section class="section">
+   <!-- Drone Assembly Exercise -->
+   <section id="exercise" class="section">
     <div class="fade-in container" #fadeTarget>
-      <app-narrative-section
-        heading="Lock On"
-        body="A mission begins long before a trigger is pulled. Intelligence analysts identify targets using satellite imagery and signals intercepts. The drone is tasked, launched, and flown to a loiter point — sometimes thousands of kilometers from its pilot. Through a satellite datalink, the operator watches, waits, and when the moment is right, executes with surgical precision. The target never sees it coming."
-        imageAlt="Drone mission planning illustration"
-      />
+      <app-drone-assembly />
     </div>
   </section>
 
@@ -52,9 +43,9 @@
   <section id="operations" class="section section--alt">
     <div class="fade-in container" #fadeTarget>
       <app-narrative-section
-        heading="Command and Control"
-        body="Combat drone operations rely on a layered command structure linking ground control stations to relay satellites to the aircraft itself. Operators can be stationed on different continents from their drones, connected through encrypted satellite uplinks with latency measured in milliseconds. This distributed architecture makes drone operations resilient — even if one link is disrupted, the drone can follow pre-programmed waypoints until contact is re-established."
-        imageAlt="Command and control network diagram"
+        heading="Juhtimine ja side"
+        body="Lahingudroonide operatsioonid tuginevad mitmetasandilisele juhtimisstruktuurile, mis ühendab maapealsed juhtimiskeskused releesatelliitide kaudu drooniga endaga. Operaatorid võivad asuda oma droonidest täiesti teisel kontinendil, ühendatuna krüpteeritud satelliidikanalite kaudu, mille viivitus on mõõdetav millisekundites. Selline hajutatud ülesehitus muudab droonioperatsioonid vastupidavaks – isegi kui üks side katkeb, suudab droon järgida etteprogrammeeritud teekonnapunkte, kuni ühendus taastatakse."
+        imageAlt="Juhtimis- ja sidevõrgu skeem"
         [reverse]="true"
       />
     </div>
@@ -65,19 +56,19 @@
     <div class="container">
       <div #fadeTarget class="fade-in fun-facts-grid">
         <app-fun-fact
-          label="Max Endurance"
-          value="40+ hrs"
-          description="The MQ-9 Reaper can stay airborne for over 27 hours; experimental solar-powered drones have exceeded 40."
+          label="Maksimaalne lennuaeg"
+          value="40+ h"
+          description="MQ-9 Reaper suudab õhus püsida üle 27 tunni; eksperimentaalsed päikeseenergial töötavad droonid on ületanud 40 tundi."
         />
         <app-fun-fact
-          label="Operational Ceiling"
-          value="15,000m"
-          description="High-altitude drones operate above most weather systems and well beyond the range of portable anti-aircraft weapons."
+          label="Tegevuslagi"
+          value="15 000 m"
+          description="Suurel kõrgusel lendavad droonid tegutsevad enamiku ilmastikusüsteemide kohal ja kaugelt väljaspool kaasaskantavate õhutõrjerelvade ulatust."
         />
         <app-fun-fact
-          label="Swarm Size"
+          label="Parve suurus"
           value="103"
-          description="In 2017, the US DoD demonstrated a swarm of 103 Perdix micro-drones operating with shared decision-making."
+          description="2017. aastal demonstreeris USA Kaitseministeerium 103 Perdix mikrodroonist koosnevat parve, mis tegutses ühise otsustamisega."
         />
       </div>
     </div>
@@ -87,36 +78,10 @@
   <section class="section section--alt">
     <div class="fade-in container" #fadeTarget>
       <app-narrative-section
-        heading="Changing the Battlefield"
-        body="The proliferation of affordable combat drones has democratized aerial warfare. Nations and non-state actors that could never afford conventional air forces now field effective drone fleets. The 2020 Nagorno-Karabakh conflict demonstrated that a fleet of Turkish TB2 drones could neutralize armored columns and air defense systems that cost orders of magnitude more. This asymmetry is reshaping defense budgets and military doctrine worldwide."
-        imageAlt="Battlefield transformation illustration"
+        heading="Lahinguvälja muutumine"
+        body="Soodsate lahingudroonide levik on demokratiseerinud õhusõja. Riigid ja mitteriiklikud osapooled, kes ei suudaks endale kunagi tavalist õhuväge lubada, käsutavad nüüd tõhusaid drooniparki. 2020. aasta Mägi-Karabahhi konflikt näitas, et Türgi TB2 droonide parv suudab neutraliseerida soomuskolonne ja õhutõrjesüsteeme, mis maksavad kordades rohkem. See asümmeetria kujundab ümber kaitse-eelarveid ja sõjalist doktriini kogu maailmas."
+        imageAlt="Lahinguvälja muutumise illustratsioon"
       />
-    </div>
-  </section>
-
-  <!-- Future of Aerial Warfare -->
-  <section id="future" class="section">
-    <div class="fade-in container" #fadeTarget>
-      <app-narrative-section
-        heading="The Future of Aerial Warfare"
-        body="Next-generation combat drones will operate in coordinated swarms, sharing targeting data and autonomously distributing tasks among themselves. Loyal wingman programs pair unmanned aircraft with manned fighters, extending a pilot's sensor and weapons reach without risking additional lives. Sixth-generation air combat concepts envision optionally-manned platforms where the same airframe can fly with or without a human on board, depending on the mission risk."
-        imageAlt="Future drone swarm concept"
-        [reverse]="true"
-      />
-    </div>
-  </section>
-
-  <!-- Closing -->
-  <section class="section">
-    <div class="fade-in container" #fadeTarget>
-      <app-closing-section />
-    </div>
-  </section>
-
-  <!-- Drone Assembly Exercise -->
-  <section id="exercise" class="section">
-    <div class="fade-in container" #fadeTarget>
-      <app-drone-assembly />
     </div>
   </section>
 
@@ -130,23 +95,23 @@
   <!-- More Modules -->
   <section id="modules" class="section">
     <div class="fade-in container" #fadeTarget>
-      <h2 class="modules-heading">Explore More Modules</h2>
+      <h2 class="modules-heading">Vaata teisi mooduleid</h2>
       <div class="modules-grid">
         <app-module-card
-          headline="Module Two"
-          intro="Continue your journey into the world of unmanned aerial systems."
+          headline="Moodul 2"
+          intro="Jätka oma teekonda mehitamata õhusõidukite maailmas."
           link="/module-two"
           [locked]="isModuleTwoLocked()"
           (loginRequested)="authService.loginWithGoogle()"
         />
         <app-module-card
-          headline="Module Three"
-          intro="Advanced tactics and electronic warfare."
+          headline="Moodul 3"
+          intro="Edasijõudnud taktika ja elektrooniline sõjapidamine."
           [disabled]="true"
         />
         <app-module-card
-          headline="Module Four"
-          intro="The ethics and future of autonomous combat."
+          headline="Moodul 4"
+          intro="Autonoomse lahingu eetika ja tulevik."
           [disabled]="true"
         />
       </div>

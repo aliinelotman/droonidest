@@ -15,11 +15,11 @@
     </div>
   </a>
   @if (disabled) {
-    <span class="module-card__badge">Available Soon</span>
+    <span class="module-card__badge">Peagi saadaval</span>
   }
   @if (locked) {
     <button class="module-card__badge module-card__badge--locked" (click)="$event.stopPropagation(); loginRequested.emit()">
-      &#128274; Login required
+      &#128274; Vajab sisselogimist
     </button>
   }
 </div>
