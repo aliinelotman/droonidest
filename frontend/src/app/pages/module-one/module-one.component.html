@@ -9,18 +9,10 @@
 
   <!-- Narrative: Multirootordroonid ja FPV -->
   <section id="overview" class="section">
-    <div class="fade-in container" #fadeTarget>
-      <app-narrative-section
+    <div class="container">
+      <app-narrative-trio
         heading="Multirootordroonid ja FPV"
-        body="Mitme tiivikuga väikesed droonid, mida kasutatakse palju ka hobideks ja igapäevatööks väljaspool sõjakonteksti, nö 'tavaline poedroon'. Kuidas teda ära tunda? Nagu droonifotograaf Kaupo Kalda kirjutab: 'Tavaline poedroon näeb välja nagu lendav kassipoeg, jalad laiali. Ta on umbes paberilehe suurune, tal on 4 käppa, 4 propellerit ja tihti seisatab, teeb pilti ja vahetab taas asukohta.'
-
-Rootorite arv võib sellisel droonil olla kolmest kaheksani, tavaliselt oleme harjunud nägema nelja rootoriga droone.
-
-Kui sellisele droonile lisada juurde kaamera, saab temast 'first person view' ehk FPV droon ning seda juhitakse kaamerast nähtava otsepildi abil, mida edastatakse raadiolainete teel droonipiloodile. Sõjalises kontekstis kasutatakse multirootor ja FPV droone näiteks luurel kas tava- või termokaamera pildi abil andmete kogumiseks. Samuti on Ukraina sõjas kasutusel ka poedroonidest ümber ehitatud või kohapeal valmistatud FPV droone, millele lisatakse väike lõhkekeha.
-
-Kuna rindel kasutavad mõlemad osapooled raadiolainete segajaid, on viimastel aastatel väikeseid FPV rünnakdroone hakatud juhtima fiiberoptiliste kaabite abil, mida droon lennates alaosas asuvast kassetist lahti kerib. Kaabli abil saadetakse piloodile videopilti ning piloodilt tagasi droonile sõidujuhiseid."
-        imageUrl="https://upload.wikimedia.org/wikipedia/commons/0/04/UA_military_FPV_drones_10.jpg"
-        imageAlt="Ukraina sõdur hoiab käes lõhkekehaga varustatud väikest FPV kvadrokopterit; taustal põllul on näha suitsu (Ukraina relvajõud, Wikimedia Commons)"
+        [items]="multirotorTrioItems"
       />
     </div>
   </section>
@@ -36,6 +28,16 @@ Kuna rindel kasutavad mõlemad osapooled raadiolainete segajaid, on viimastel aa
   <section id="gallery" class="section section--alt">
     <div class="fade-in container" #fadeTarget>
       <app-gallery />
+    </div>
+  </section>
+
+  <!-- Narrative: Suuremõõdulised ründedroonid -->
+  <section id="attack-drones" class="section">
+    <div class="container">
+      <app-narrative-trio
+        heading="Suuremõõdulised ründedroonid"
+        [items]="attackDroneTrioItems"
+      />
     </div>
   </section>
 
@@ -71,17 +73,6 @@ Kuna rindel kasutavad mõlemad osapooled raadiolainete segajaid, on viimastel aa
           description="2017. aastal demonstreeris USA Kaitseministeerium 103 Perdix mikrodroonist koosnevat parve, mis tegutses ühise otsustamisega."
         />
       </div>
-    </div>
-  </section>
-
-  <!-- Changing the Battlefield -->
-  <section class="section section--alt">
-    <div class="fade-in container" #fadeTarget>
-      <app-narrative-section
-        heading="Lahinguvälja muutumine"
-        body="Soodsate lahingudroonide levik on demokratiseerinud õhusõja. Riigid ja mitteriiklikud osapooled, kes ei suudaks endale kunagi tavalist õhuväge lubada, käsutavad nüüd tõhusaid drooniparki. 2020. aasta Mägi-Karabahhi konflikt näitas, et Türgi TB2 droonide parv suudab neutraliseerida soomuskolonne ja õhutõrjesüsteeme, mis maksavad kordades rohkem. See asümmeetria kujundab ümber kaitse-eelarveid ja sõjalist doktriini kogu maailmas."
-        imageAlt="Lahinguvälja muutumise illustratsioon"
-      />
     </div>
   </section>
 

@@ -1,0 +1,13 @@
+.narrative-trio__item {
+  & + & {
+    margin-top: 64px;
+  }
+}
+
+@media (max-width: 768px) {
+  .narrative-trio__item {
+    & + & {
+      margin-top: 40px;
+    }
+  }
+}

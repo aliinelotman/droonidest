@@ -1,6 +1,8 @@
 <section class="narrative" [class.narrative--reverse]="reverse">
   <div class="narrative__text">
-    <h2 class="narrative__heading">{{ heading }}</h2>
+    @if (heading) {
+      <h2 class="narrative__heading">{{ heading }}</h2>
+    }
     @for (para of bodyParagraphs; track $index) {
       <p class="narrative__body">{{ para }}</p>
     }
