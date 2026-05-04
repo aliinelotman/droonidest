@@ -27,6 +27,11 @@
     font-size: 1rem;
     color: var(--color-text-muted);
     line-height: 1.8;
+    margin: 0;
+
+    &:not(:first-of-type) {
+      margin-top: 1rem;
+    }
   }
 
   &__image {

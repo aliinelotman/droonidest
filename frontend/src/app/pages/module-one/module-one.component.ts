@@ -55,18 +55,18 @@ export class ModuleOneComponent implements AfterViewInit, OnDestroy {
   readonly isModuleTwoLocked = computed(() => !this.authService.currentUser());
 
   navSections: NavSection[] = [
-    { id: 'hero', label: 'Intro' },
-    { id: 'overview', label: 'Overview' },
-    { id: 'gallery', label: 'Arsenal' },
-    { id: 'operations', label: 'Operations' },
-    { id: 'future', label: 'Future' },
+    { id: 'hero', label: 'Sissejuhatus' },
+    { id: 'overview', label: 'Ülevaade' },
     { id: 'exercise', label: 'Harjutus' },
-    { id: 'quiz', label: 'Quiz' },
+    { id: 'gallery', label: 'Galerii' },
+    { id: 'operations', label: 'Juhtimine' },
+    { id: 'quiz', label: 'Test' },
+    { id: 'modules', label: 'Moodulid' },
   ];
 
   moduleLinks: ModuleLink[] = [
-    { label: 'Module One', route: '/', active: true },
-    { label: 'Module Two', route: '/module-two' },
+    { label: 'Moodul 1', route: '/', active: true },
+    { label: 'Moodul 2', route: '/module-two' },
   ];
 
   ngAfterViewInit(): void {

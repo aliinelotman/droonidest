@@ -1,6 +1,6 @@
 <div class="quiz">
-  <h2 class="quiz__title">Test Your Knowledge</h2>
-  <p class="quiz__subtitle">The Combat Drone Quiz</p>
+  <h2 class="quiz__title">Pane oma teadmised proovile</h2>
+  <p class="quiz__subtitle">Lahingudroonide test</p>
 
   @if (!submitted) {
     <div class="quiz__questions">
@@ -27,24 +27,24 @@
       [disabled]="!allAnswered"
       (click)="submit()"
     >
-      Submit Answers
+      Saada vastused
     </button>
   } @else {
     <div class="quiz__results">
       <div class="quiz__score">
         <span class="quiz__score-value">{{ scorePercent }}%</span>
-        <span class="quiz__score-label">{{ score }} / {{ questions.length }} correct</span>
+        <span class="quiz__score-label">{{ score }} / {{ questions.length }} õigesti</span>
       </div>
       <p class="quiz__feedback">
         @if (scorePercent === 100) {
-          Outstanding! You're a true drone warfare expert.
+          Suurepärane! Sa oled tõeline droonisõja asjatundja.
         } @else if (scorePercent >= 50) {
-          Good effort! You know your way around unmanned combat.
+          Tubli töö! Mehitamata lahingu maailmas oled juba kodus.
         } @else {
-          Keep exploring — there's much more to learn about combat drones.
+          Uuri veel – lahingudroonide kohta on palju rohkem teada saada.
         }
       </p>
-      <button class="quiz__submit" (click)="reset()">Try Again</button>
+      <button class="quiz__submit" (click)="reset()">Proovi uuesti</button>
     </div>
   }
 </div>

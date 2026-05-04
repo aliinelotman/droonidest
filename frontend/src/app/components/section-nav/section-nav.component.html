@@ -56,9 +56,9 @@
     }
     <li class="nav__item" [style.--i]="sections.length + (currentUser()?.role === 'ADMIN' ? 1 : 0)">
       @if (currentUser()) {
-        <button class="nav__link" (click)="logout()">Logout</button>
+        <button class="nav__link" (click)="logout()">Logi välja</button>
       } @else {
-        <button class="nav__link" (click)="login()">Login</button>
+        <button class="nav__link" (click)="login()">Logi sisse</button>
       }
     </li>
     @if (moduleLinks.length) {
