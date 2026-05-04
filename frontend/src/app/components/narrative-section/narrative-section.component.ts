@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './narrative-section.component.scss',
 })
 export class NarrativeSectionComponent {
-  @Input({ required: true }) heading!: string;
+  @Input() heading = '';
   @Input({ required: true }) body!: string;
   @Input() imageUrl = '';
   @Input() imageAlt = 'Illustration';

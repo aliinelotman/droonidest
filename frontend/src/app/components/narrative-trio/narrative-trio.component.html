@@ -1,0 +1,11 @@
+@for (item of items; track $index) {
+  <div class="fade-in narrative-trio__item" #fadeTarget>
+    <app-narrative-section
+      [heading]="$index === 0 ? heading : ''"
+      [body]="item.body"
+      [imageUrl]="item.imageUrl"
+      [imageAlt]="item.imageAlt"
+      [reverse]="$index % 2 === 1"
+    />
+  </div>
+}
